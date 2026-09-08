@@ -1,0 +1,11 @@
+packages:
+  - frontend
+  - backend
+overrides:
+  "@prisma/config>deepmerge-ts": ^8.0.0
+allowBuilds:
+  "@prisma/client": true
+  "@prisma/engines": true
+  prisma: true
+  esbuild: true
+  sharp: true
