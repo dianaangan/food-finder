@@ -17,6 +17,8 @@ export default function Home() {
     loading,
     checking,
     checkoutBusy,
+    cancelBusy,
+    cancelSubscription,
     error,
     billingError,
     historyError,
@@ -117,6 +119,8 @@ export default function Home() {
           busy={checkoutBusy}
           checking={checking}
           onSubscribe={() => void subscribe()}
+          cancelBusy={cancelBusy}
+          onCancel={() => void cancelSubscription()}
           onRefresh={() =>
             void refreshSubscription(true).then(() => {
               if (submitted) void runSearch(submitted, language);

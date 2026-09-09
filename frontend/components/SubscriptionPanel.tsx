@@ -8,6 +8,8 @@ export function SubscriptionPanel({
   checking,
   onSubscribe,
   onRefresh,
+  cancelBusy,
+  onCancel,
 }: {
   language: Language;
   subscription: Subscription | null;
@@ -15,6 +17,8 @@ export function SubscriptionPanel({
   checking: boolean;
   onSubscribe: () => void;
   onRefresh: () => void;
+  cancelBusy: boolean;
+  onCancel: () => void;
 }) {
   const t = dictionaries[language];
   const issue =
@@ -45,6 +49,15 @@ export function SubscriptionPanel({
           >
             {busy ? t.opening : t.subscribe}
             <span aria-hidden="true"> ↗</span>
+          </button>
+        )}
+        {subscription?.active && (
+          <button
+            className="text-sm font-medium text-slate-600 underline underline-offset-4"
+            disabled={cancelBusy}
+            onClick={onCancel}
+          >
+            {cancelBusy ? t.canceling : t.cancel}
           </button>
         )}
         <button

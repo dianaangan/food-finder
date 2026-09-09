@@ -48,6 +48,17 @@ export class Billing {
   async refresh() {
     return this.store.locked((context) => this.sync(context));
   }
+
+  async cancel(): Promise<void> {
+    await this.store.locked(async ({ user }) => {
+      if (!user.stripeSubscriptionId || user.subscriptionStatus !== "active") {
+        throw new AppError(409, "NO_ACTIVE_SUBSCRIPTION");
+      }
+      await this.stripe.subscriptions.update(user.stripeSubscriptionId, {
+        cancel_at_period_end: true,
+      });
+    });
+  }
   async checkout(_language: Language): Promise<string> {
     const result = await this.store.locked(async (context) => {
       let user = await this.sync(context);

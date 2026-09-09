@@ -8,12 +8,12 @@ const config = {
   priceId: "price_monthly",
   origin: "http://localhost:3000",
 };
-function setup() {
+function setup(status = "none") {
   let user = {
     id: "demo",
     stripeCustomerId: "cus_demo" as string | null,
-    stripeSubscriptionId: null as string | null,
-    subscriptionStatus: "none",
+    stripeSubscriptionId: status === "active" ? "sub_demo" : null,
+    subscriptionStatus: status,
     checkoutSessionId: null as string | null,
     checkoutAttempt: 0,
     createdAt: new Date(),
@@ -158,5 +158,15 @@ describe("verified subscription reconciliation", () => {
       }),
     );
     expect(getUser().checkoutSessionId).toBe("cs_test_1");
+  });
+  it("schedules cancellation for an active subscription", async () => {
+    const { billing, stripe } = setup("active");
+    const update = vi
+      .spyOn(stripe.subscriptions, "update")
+      .mockResolvedValue({} as Stripe.Response<Stripe.Subscription>);
+    await billing.cancel();
+    expect(update).toHaveBeenCalledWith("sub_demo", {
+      cancel_at_period_end: true,
+    });
   });
 });

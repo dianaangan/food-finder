@@ -12,7 +12,7 @@ import type { Store } from "./store.js";
 import type { Billing } from "./billing.js";
 export interface Dependencies {
   store: Pick<Store, "user" | "recent" | "saveSearch">;
-  billing?: Pick<Billing, "checkout" | "webhook" | "refresh">;
+  billing?: Pick<Billing, "checkout" | "webhook" | "refresh" | "cancel">;
   search: (term: string, language: Language) => Promise<unknown[]>;
   origin: string;
   log?: (error: unknown) => void;
@@ -25,7 +25,11 @@ export function createApp({
   log = console.error,
 }: Dependencies) {
   const app = express();
-  const allowedOrigins = new Set([origin, "http://localhost:3000", "http://127.0.0.1:3000"]);
+  const allowedOrigins = new Set([
+    origin,
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+  ]);
   app.disable("x-powered-by");
   app.use(helmet());
   app.use("/api", (_req, res, next) => {
@@ -93,7 +97,8 @@ export function createApp({
     });
   });
   app.post("/api/checkout", async (req, res) => {
-    if (!allowedOrigins.has(req.get("origin") ?? "")) throw new AppError(403, "INVALID_ORIGIN");
+    if (!allowedOrigins.has(req.get("origin") ?? ""))
+      throw new AppError(403, "INVALID_ORIGIN");
     if (!billing) throw new AppError(503, "BILLING_UNAVAILABLE");
     const language: unknown = req.body?.language;
     if (
@@ -102,6 +107,11 @@ export function createApp({
     )
       throw new AppError(400, "INVALID_LANGUAGE");
     res.json({ url: await billing.checkout(language as Language) });
+  });
+  app.post("/api/subscription/cancel", async (_req, res) => {
+    if (!billing) throw new AppError(503, "BILLING_UNAVAILABLE");
+    await billing.cancel();
+    res.json({ ok: true });
   });
   app.use((_req, _res, next) => next(new AppError(404, "NOT_FOUND")));
   const errors: ErrorRequestHandler = (error: unknown, _req, res, _next) => {

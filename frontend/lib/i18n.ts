@@ -20,6 +20,10 @@ const en = {
   nutrition: "Nutrition",
   per100g: "Per 100 g / 100 ml",
   locked: "Unlock nutritional details",
+  cancel: "Unsubscribe",
+  canceling: "Updating subscription…",
+  canceledAtPeriodEnd: "Cancellation scheduled at period end.",
+  cancelError: "We could not update your subscription.",
   lockedDetail:
     "A monthly subscription gives you access to available nutritional values.",
   noNutrition: "Nutritional values are unavailable for this product.",
@@ -82,6 +86,10 @@ export const dictionaries: Record<Language, Dictionary> = {
     nutrition: "Voedingswaarden",
     per100g: "Per 100 g / 100 ml",
     locked: "Ontgrendel voedingswaarden",
+    cancel: "Uitschrijven",
+    canceling: "Abonnement bijwerken…",
+    canceledAtPeriodEnd: "Opzegging gepland aan het einde van de periode.",
+    cancelError: "We konden je abonnement niet bijwerken.",
     lockedDetail:
       "Met een maandabonnement bekijk je de beschikbare voedingswaarden.",
     noNutrition: "Voedingswaarden zijn niet beschikbaar voor dit product.",
@@ -145,6 +153,10 @@ export const dictionaries: Record<Language, Dictionary> = {
     nutrition: "Nährwerte",
     per100g: "Pro 100 g / 100 ml",
     locked: "Nährwerte freischalten",
+    cancel: "Abonnement kündigen",
+    canceling: "Abonnement wird aktualisiert…",
+    canceledAtPeriodEnd: "Kündigung zum Ende des Zeitraums geplant.",
+    cancelError: "Das Abonnement konnte nicht aktualisiert werden.",
     lockedDetail:
       "Ein Monatsabonnement bietet Zugriff auf verfügbare Nährwerte.",
     noNutrition: "Für dieses Produkt sind keine Nährwerte verfügbar.",
@@ -212,6 +224,10 @@ export const dictionaries: Record<Language, Dictionary> = {
     nutrition: "Valeurs nutritionnelles",
     per100g: "Pour 100 g / 100 ml",
     locked: "Débloquez les valeurs nutritionnelles",
+    cancel: "Se désabonner",
+    canceling: "Abonnement mis à jour…",
+    canceledAtPeriodEnd: "Résiliation prévue à la fin de la période.",
+    cancelError: "Impossible de mettre à jour votre abonnement.",
     lockedDetail:
       "Un abonnement mensuel donne accès aux valeurs nutritionnelles disponibles.",
     noNutrition:
@@ -276,6 +292,7 @@ export function errorText(code: string, language: Language) {
     BILLING_UNAVAILABLE: t.billingError,
     SUBSCRIPTION_EXISTS: t.exists,
     SUBSCRIPTION_PENDING: t.pending,
+    CANCEL_ERROR: t.cancelError,
   };
   return map[code] ?? t.error;
 }
