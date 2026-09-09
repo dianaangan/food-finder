@@ -94,7 +94,7 @@ The secret key, price, and webhook secret must belong to the same Stripe test ac
 - The account panel above the search shows access status. **Subscribe monthly** opens Stripe test Checkout.
 - Use test card `4242 4242 4242 4242`, any future expiry and any three-digit CVC. After returning, **Refresh status** checks access and reloads products.
 - An active subscription unlocks available nutrition. **Reset test subscription** ends the demo subscription immediately so you can test checkout again.
-- Notifications appear in the top corner; dismiss them with ×. If products fail to load, choose **Try again**.
+- Notifications appear in the bottom corner; dismiss them with ×. If products fail to load, choose **Try again**.
 - Everyone uses one shared demo account. Product information may be incomplete; nutrition is available only when supplied by Open Food Facts.
 
 ## Implementation notes

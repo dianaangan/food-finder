@@ -14,7 +14,7 @@ export function ProductCard({
   const name = product.name ?? t.unknownName;
   const values = product.nutrition;
   return (
-    <article className="product-card group">
+    <article className="product-card">
       <div className="product-photo">
         {product.image && failedImage !== product.image ? (
           <img
@@ -34,19 +34,29 @@ export function ProductCard({
           </div>
         )}
       </div>
-      <div className="flex flex-1 flex-col p-5">
-        <p className="mb-1 truncate text-xs font-bold uppercase tracking-wider text-emerald-700">
+      <div className="flex flex-1 flex-col pt-4">
+        <p className="mb-1 text-xs text-stone-500 break-words">
           {product.brand ?? t.unknownBrand}
         </p>
-        <h3 className="mb-5 line-clamp-2 min-h-12 text-base font-bold leading-6 text-slate-900">
+        <h3 className="mb-4 text-sm font-medium leading-6 text-stone-900 break-words">
           {name}
         </h3>
         {!values ? (
           <div className="locked-box mt-auto">
             <span className="lock-icon" aria-hidden="true">
-              ◇
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+              >
+                <rect x="5" y="10" width="14" height="11" rx="2" />
+                <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+              </svg>
             </span>
-            <p className="text-sm font-semibold">{t.locked}</p>
+            <p className="text-xs">{t.locked}</p>
           </div>
         ) : (
           <div>

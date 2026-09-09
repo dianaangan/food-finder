@@ -61,24 +61,21 @@ export default function Home() {
   }
   function changePage(nextPage: number) {
     void runSearch(submitted, language, nextPage);
-    resultsSection.current?.scrollIntoView?.({ behavior: "smooth" });
+    resultsSection.current?.scrollIntoView?.({ behavior: "auto" });
   }
   return (
     <>
       <header className="site-header">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4 sm:px-8">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-5 sm:px-8">
           <a href="/" className="brand" aria-label="Food Finder home">
-            <span className="brand-mark" aria-hidden="true">
-              f
-            </span>
             <span>foodfinder</span>
           </a>
           <label className="language-picker">
-            <span className="hidden text-sm font-medium text-slate-600 sm:inline">
+            <span className="sr-only sm:not-sr-only sm:text-sm sm:text-slate-600">
               {t.language}
             </span>
             <select
-              className="rounded-xl border border-slate-200 bg-white py-2.5 pl-3 pr-9 text-sm font-medium shadow-sm"
+              className="language-select"
               value={language}
               onChange={(e) => changeLanguage(e.target.value as Language)}
             >
@@ -91,7 +88,7 @@ export default function Home() {
           </label>
         </div>
       </header>
-      <main className="mx-auto max-w-7xl space-y-8 px-5 py-7 sm:px-8 sm:py-10">
+      <main className="mx-auto max-w-6xl space-y-8 px-5 pb-8 sm:px-8">
         <SubscriptionPanel
           language={language}
           subscription={subscription}
@@ -107,11 +104,10 @@ export default function Home() {
         />
         <section className="search-panel">
           <div className="max-w-3xl">
-            <p className="eyebrow">{t.explore}</p>
-            <h1 className="mt-3 text-3xl font-bold tracking-[-0.035em] text-slate-950 sm:text-5xl">
+            <h1 className="text-3xl font-medium tracking-[-0.045em] text-slate-950 sm:text-4xl">
               {t.title}
             </h1>
-            <p className="mt-3 max-w-2xl text-base leading-7 text-slate-600 sm:text-lg">
+            <p className="mt-3 max-w-2xl text-base leading-7 text-slate-500">
               {t.intro}
             </p>
           </div>
@@ -119,13 +115,26 @@ export default function Home() {
             onSubmit={submit}
             className="mt-7 flex flex-col gap-3 sm:flex-row"
           >
-            <label className="search-field">
+            <div className="search-field">
               <span className="search-icon" aria-hidden="true">
-                ⌕
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                >
+                  <circle cx="10.5" cy="10.5" r="6.5" />
+                  <path d="m16 16 4 4" />
+                </svg>
               </span>
-              <span className="sr-only">{t.searchLabel}</span>
+              <label htmlFor="food-search" className="sr-only">
+                {t.searchLabel}
+              </label>
               <input
-                className="w-full rounded-2xl border border-slate-200 bg-white py-4 pl-12 pr-12 text-slate-950 shadow-sm transition focus:border-emerald-600"
+                id="food-search"
+                className="search-input"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder={t.placeholder}
@@ -145,7 +154,7 @@ export default function Home() {
                   ×
                 </button>
               )}
-            </label>
+            </div>
             <button
               className="button-primary min-w-44"
               disabled={sameRequest}
@@ -153,16 +162,13 @@ export default function Home() {
             >
               {sameRequest && <span className="spinner" aria-hidden="true" />}
               {sameRequest ? t.searching : t.search}
-              <span aria-hidden="true"> →</span>
             </button>
           </form>
           <div
             className="mt-5 flex flex-wrap items-center gap-2"
             aria-label={t.recent}
           >
-            <h2 className="mr-1 text-xs font-bold uppercase tracking-wider text-slate-500">
-              {t.recent}
-            </h2>
+            <h2 className="mr-1 text-xs text-slate-500">{t.recent}</h2>
             {recent
               .filter(
                 (item, index, items) =>
@@ -180,7 +186,7 @@ export default function Home() {
                     void runSearch(item.term, language);
                   }}
                 >
-                  <span aria-hidden="true">↗</span> {item.term}
+                  {item.term}
                 </button>
               ))}
             {!recent.length && (
@@ -199,10 +205,7 @@ export default function Home() {
             className="mb-5 flex min-h-10 flex-wrap items-end justify-between gap-3"
           >
             <div>
-              <p className="eyebrow">
-                {submitted ? t.searchResults : t.popular}
-              </p>
-              <h2 className="mt-1 text-2xl font-bold tracking-tight text-slate-950">
+              <h2 className="text-lg font-medium tracking-tight text-slate-950 break-words">
                 {submitted ? `${t.resultsFor} “${submitted}”` : t.results}
               </h2>
             </div>
@@ -214,7 +217,7 @@ export default function Home() {
             )}
           </div>
           {result?.products.length ? (
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="grid gap-x-6 gap-y-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {result.products.map((product, index) => (
                 <ProductCard
                   key={`${product.id}-${index}`}
@@ -231,7 +234,7 @@ export default function Home() {
               {Array.from({ length: 8 }, (_, index) => (
                 <div
                   key={index}
-                  className="h-80 animate-pulse rounded-3xl border border-slate-200 bg-white motion-reduce:animate-none"
+                  className="h-80 animate-pulse rounded-lg bg-stone-100 motion-reduce:animate-none"
                 >
                   <div className="m-5 h-40 rounded-xl bg-slate-100" />
                   <div className="mx-5 h-4 w-2/3 rounded bg-slate-100" />
@@ -239,7 +242,7 @@ export default function Home() {
               ))}
             </div>
           ) : (
-            <div className="rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-14 text-center">
+            <div className="rounded-lg bg-stone-50 px-6 py-14 text-center">
               <span
                 className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-emerald-50 text-2xl text-emerald-700"
                 aria-hidden="true"
