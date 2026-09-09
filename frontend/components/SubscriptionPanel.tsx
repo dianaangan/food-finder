@@ -10,6 +10,8 @@ export function SubscriptionPanel({
   onRefresh,
   cancelBusy,
   onCancel,
+  resetBusy,
+  onReset,
 }: {
   language: Language;
   subscription: Subscription | null;
@@ -19,6 +21,8 @@ export function SubscriptionPanel({
   onRefresh: () => void;
   cancelBusy: boolean;
   onCancel: () => void;
+  resetBusy: boolean;
+  onReset: () => void;
 }) {
   const t = dictionaries[language];
   const issue =
@@ -60,6 +64,13 @@ export function SubscriptionPanel({
             {cancelBusy ? t.canceling : t.cancel}
           </button>
         )}
+        <button
+          className="text-xs text-slate-500 underline underline-offset-4"
+          disabled={resetBusy}
+          onClick={onReset}
+        >
+          {resetBusy ? t.canceling : t.resetTest}
+        </button>
         <button
           className="text-sm font-medium text-emerald-800 underline decoration-emerald-300 underline-offset-4 disabled:opacity-50"
           onClick={onRefresh}

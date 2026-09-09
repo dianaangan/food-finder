@@ -59,6 +59,18 @@ export class Billing {
       });
     });
   }
+
+  async resetForTest(): Promise<void> {
+    await this.store.locked(async ({ user, tx }) => {
+      if (user.stripeSubscriptionId) {
+        await this.stripe.subscriptions.cancel(user.stripeSubscriptionId);
+      }
+      await tx.demoUser.update({
+        where: { id: DEMO_ID },
+        data: { stripeSubscriptionId: null, subscriptionStatus: "none" },
+      });
+    });
+  }
   async checkout(_language: Language): Promise<string> {
     const result = await this.store.locked(async (context) => {
       let user = await this.sync(context);

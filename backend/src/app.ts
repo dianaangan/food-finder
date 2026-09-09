@@ -12,7 +12,10 @@ import type { Store } from "./store.js";
 import type { Billing } from "./billing.js";
 export interface Dependencies {
   store: Pick<Store, "user" | "recent" | "saveSearch">;
-  billing?: Pick<Billing, "checkout" | "webhook" | "refresh" | "cancel">;
+  billing?: Pick<
+    Billing,
+    "checkout" | "webhook" | "refresh" | "cancel" | "resetForTest"
+  >;
   search: (term: string, language: Language) => Promise<unknown[]>;
   origin: string;
   log?: (error: unknown) => void;
@@ -111,6 +114,11 @@ export function createApp({
   app.post("/api/subscription/cancel", async (_req, res) => {
     if (!billing) throw new AppError(503, "BILLING_UNAVAILABLE");
     await billing.cancel();
+    res.json({ ok: true });
+  });
+  app.post("/api/subscription/reset-test", async (_req, res) => {
+    if (!billing) throw new AppError(503, "BILLING_UNAVAILABLE");
+    await billing.resetForTest();
     res.json({ ok: true });
   });
   app.use((_req, _res, next) => next(new AppError(404, "NOT_FOUND")));

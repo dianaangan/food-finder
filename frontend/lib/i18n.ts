@@ -9,7 +9,7 @@ const en = {
   searching: "Searching…",
   recent: "Recent searches",
   noRecent: "Your recent searches will appear here.",
-  results: "Search results",
+  results: "Products",
   first: "Start with something in your cupboard",
   firstDetail: "Search a product or brand to see what you can find.",
   noResults: "No foods found",
@@ -24,6 +24,7 @@ const en = {
   canceling: "Updating subscription…",
   canceledAtPeriodEnd: "Cancellation scheduled at period end.",
   cancelError: "We could not update your subscription.",
+  resetTest: "Reset test subscription",
   lockedDetail:
     "A monthly subscription gives you access to available nutritional values.",
   noNutrition: "Nutritional values are unavailable for this product.",
@@ -75,7 +76,7 @@ export const dictionaries: Record<Language, Dictionary> = {
     searching: "Zoeken…",
     recent: "Recente zoekopdrachten",
     noRecent: "Je recente zoekopdrachten verschijnen hier.",
-    results: "Zoekresultaten",
+    results: "Producten",
     first: "Begin met iets uit je keukenkast",
     firstDetail: "Zoek een product of merk om te zien wat je vindt.",
     noResults: "Geen producten gevonden",
@@ -90,6 +91,7 @@ export const dictionaries: Record<Language, Dictionary> = {
     canceling: "Abonnement bijwerken…",
     canceledAtPeriodEnd: "Opzegging gepland aan het einde van de periode.",
     cancelError: "We konden je abonnement niet bijwerken.",
+    resetTest: "Testabonnement resetten",
     lockedDetail:
       "Met een maandabonnement bekijk je de beschikbare voedingswaarden.",
     noNutrition: "Voedingswaarden zijn niet beschikbaar voor dit product.",
@@ -140,7 +142,7 @@ export const dictionaries: Record<Language, Dictionary> = {
     searching: "Suche läuft…",
     recent: "Letzte Suchanfragen",
     noRecent: "Deine letzten Suchanfragen erscheinen hier.",
-    results: "Suchergebnisse",
+    results: "Produkte",
     first: "Beginne mit etwas aus deinem Vorratsschrank",
     firstDetail:
       "Suche ein Produkt oder eine Marke und entdecke die Ergebnisse.",
@@ -157,6 +159,7 @@ export const dictionaries: Record<Language, Dictionary> = {
     canceling: "Abonnement wird aktualisiert…",
     canceledAtPeriodEnd: "Kündigung zum Ende des Zeitraums geplant.",
     cancelError: "Das Abonnement konnte nicht aktualisiert werden.",
+    resetTest: "Testabonnement zurücksetzen",
     lockedDetail:
       "Ein Monatsabonnement bietet Zugriff auf verfügbare Nährwerte.",
     noNutrition: "Für dieses Produkt sind keine Nährwerte verfügbar.",
@@ -212,7 +215,7 @@ export const dictionaries: Record<Language, Dictionary> = {
     searching: "Recherche…",
     recent: "Recherches récentes",
     noRecent: "Vos recherches récentes apparaîtront ici.",
-    results: "Résultats de recherche",
+    results: "Produits",
     first: "Commencez par un produit de votre placard",
     firstDetail:
       "Recherchez un produit ou une marque pour découvrir les résultats.",
@@ -228,6 +231,7 @@ export const dictionaries: Record<Language, Dictionary> = {
     canceling: "Abonnement mis à jour…",
     canceledAtPeriodEnd: "Résiliation prévue à la fin de la période.",
     cancelError: "Impossible de mettre à jour votre abonnement.",
+    resetTest: "Réinitialiser l’abonnement test",
     lockedDetail:
       "Un abonnement mensuel donne accès aux valeurs nutritionnelles disponibles.",
     noNutrition:

@@ -19,6 +19,7 @@ export function useFoodFinder() {
   const [checking, setChecking] = useState(false);
   const [checkoutBusy, setCheckoutBusy] = useState(false);
   const [cancelBusy, setCancelBusy] = useState(false);
+  const [resetBusy, setResetBusy] = useState(false);
   const [error, setError] = useState("");
   const [billingError, setBillingError] = useState("");
   const [historyError, setHistoryError] = useState("");
@@ -158,6 +159,18 @@ export function useFoodFinder() {
       setCancelBusy(false);
     }
   }
+  async function resetSubscription() {
+    setResetBusy(true);
+    try {
+      await api("/subscription/reset-test", { method: "POST" });
+      await refreshSubscription(true);
+      setBillingError("");
+    } catch {
+      setBillingError("CANCEL_ERROR");
+    } finally {
+      setResetBusy(false);
+    }
+  }
   return {
     language,
     query,
@@ -171,6 +184,8 @@ export function useFoodFinder() {
     checkoutBusy,
     cancelBusy,
     cancelSubscription,
+    resetBusy,
+    resetSubscription,
     error,
     billingError,
     historyError,

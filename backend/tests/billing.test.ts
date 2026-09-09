@@ -169,4 +169,13 @@ describe("verified subscription reconciliation", () => {
       cancel_at_period_end: true,
     });
   });
+  it("resets the demo subscription for repeatable test runs", async () => {
+    const { billing, stripe, getUser } = setup("active");
+    const cancel = vi
+      .spyOn(stripe.subscriptions, "cancel")
+      .mockResolvedValue({} as Stripe.Response<Stripe.Subscription>);
+    await billing.resetForTest();
+    expect(cancel).toHaveBeenCalledWith("sub_demo");
+    expect(getUser().subscriptionStatus).toBe("none");
+  });
 });

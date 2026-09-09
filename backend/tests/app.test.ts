@@ -105,6 +105,7 @@ describe("API security and behavior", () => {
       webhook: vi.fn(),
       refresh: vi.fn(),
       cancel: vi.fn(),
+      resetForTest: vi.fn(),
     };
     const app = createApp(deps);
     expect(
@@ -135,6 +136,7 @@ describe("API security and behavior", () => {
         .mockRejectedValue(new AppError(400, "INVALID_SIGNATURE")),
       refresh: vi.fn(),
       cancel: vi.fn(),
+      resetForTest: vi.fn(),
     };
     const app = createApp(deps);
     const payload = '{ "type": "example" }';
