@@ -133,3 +133,23 @@ pnpm build
 For optional MySQL integration tests, set `TEST_DATABASE_URL` to a separate migrated test database, then run `pnpm --filter backend test:db`. Never use the application database for this test.
 
 After building, run `pnpm --filter backend start` and `pnpm --filter frontend start` in separate terminals. Keep MySQL running. Stop each terminal with Ctrl+C.
+
+
+Screenshots:
+
+<img width="1649" height="831" alt="{7CD125E5-599C-42B1-B5EA-E0ED479E631E}" src="https://github.com/user-attachments/assets/021c3c3d-9931-428e-b4b5-fea76bc622ac" />
+
+<img width="1674" height="642" alt="{29035CB4-6D0D-48F1-91D8-97B378C426D7}" src="https://github.com/user-attachments/assets/01a1d652-c01b-4b41-90ae-946644faaf58" />
+
+<img width="1679" height="827" alt="{0A0DC551-8E0B-432B-B357-45C8946846E3}" src="https://github.com/user-attachments/assets/194e5f4d-d979-4636-8f2e-14db5c3c64b1" />
+
+<img width="1677" height="840" alt="{2005B9BB-EB4B-4FD4-BC07-3A4F1F22F497}" src="https://github.com/user-attachments/assets/f55acd0d-2bd7-42a7-83b3-326fe012bb0b" />
+
+<img width="1679" height="872" alt="{0E087443-A046-49B4-9885-A5C2EB126FC3}" src="https://github.com/user-attachments/assets/4af6c557-7940-4bfb-bf31-4775b6ad5e2f" />
+
+<img width="1681" height="818" alt="{30E0A5F9-3580-4FC5-A7E4-B8759C7332DB}" src="https://github.com/user-attachments/assets/f6a6ece3-be45-44bf-96d2-b59c58fc57fe" />
+
+
+
+
+
