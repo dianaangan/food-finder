@@ -25,6 +25,7 @@ export function createApp({
   log = console.error,
 }: Dependencies) {
   const app = express();
+  const allowedOrigins = new Set([origin, "http://localhost:3000", "http://127.0.0.1:3000"]);
   app.disable("x-powered-by");
   app.use(helmet());
   app.use("/api", (_req, res, next) => {
@@ -92,7 +93,7 @@ export function createApp({
     });
   });
   app.post("/api/checkout", async (req, res) => {
-    if (req.get("origin") !== origin) throw new AppError(403, "INVALID_ORIGIN");
+    if (!allowedOrigins.has(req.get("origin") ?? "")) throw new AppError(403, "INVALID_ORIGIN");
     if (!billing) throw new AppError(503, "BILLING_UNAVAILABLE");
     const language: unknown = req.body?.language;
     if (
