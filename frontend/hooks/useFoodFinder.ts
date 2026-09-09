@@ -101,6 +101,9 @@ export function useFoodFinder() {
       /* Preference storage is optional in private browsing. */
     }
     void loadRecent();
+    void api<SearchResult>("/featured")
+      .then((data) => setResult(data))
+      .catch(() => undefined);
     const checkout = new URLSearchParams(window.location.search).get(
       "checkout",
     );

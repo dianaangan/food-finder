@@ -62,6 +62,16 @@ export default function Home() {
         </div>
       </header>
       <main className="mx-auto max-w-6xl space-y-7 px-5 py-8 sm:px-8 sm:py-10">
+        <SubscriptionPanel
+          language={language}
+          subscription={subscription}
+          busy={checkoutBusy}
+          checking={checking}
+          onSubscribe={() => void subscribe()}
+          resetBusy={resetBusy}
+          onReset={() => void resetSubscription()}
+          onRefresh={() => void refreshSubscription(true)}
+        />
         <section>
           <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
             {t.title}
@@ -115,22 +125,6 @@ export default function Home() {
             {errorText(historyError, language)}
           </p>
         )}
-        <SubscriptionPanel
-          language={language}
-          subscription={subscription}
-          busy={checkoutBusy}
-          checking={checking}
-          onSubscribe={() => void subscribe()}
-          cancelBusy={cancelBusy}
-          onCancel={() => void cancelSubscription()}
-          resetBusy={resetBusy}
-          onReset={() => void resetSubscription()}
-          onRefresh={() =>
-            void refreshSubscription(true).then(() => {
-              if (submitted) void runSearch(submitted, language);
-            })
-          }
-        />
         {billingError && (
           <p role="alert" className="notice">
             {errorText(billingError, language)}

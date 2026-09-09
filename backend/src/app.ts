@@ -85,6 +85,16 @@ export function createApp({
       warning,
     });
   });
+  app.get("/api/featured", async (_req, res) => {
+    const raw = await search("oats", "en");
+    const user = await store.user();
+    const premium = user.subscriptionStatus === "active";
+    res.json({
+      products: raw.map((p, i) => normalizeProduct(p, "en", premium, i)),
+      premium,
+      warning: null,
+    });
+  });
   app.get("/api/recent-searches", async (_req, res) => {
     res.json({ searches: await store.recent() });
   });
