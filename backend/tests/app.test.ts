@@ -104,6 +104,7 @@ describe("API security and behavior", () => {
       checkout: vi.fn().mockResolvedValue("https://checkout.stripe.com/test"),
       webhook: vi.fn(),
       refresh: vi.fn(),
+      cancel: vi.fn(),
     };
     const app = createApp(deps);
     expect(
@@ -114,7 +115,7 @@ describe("API security and behavior", () => {
           .send({ language: "en" })
       ).status,
     ).toBe(403);
-    expect(deps.billing.checkout).not.toHaveBeenCalled();
+    expect(deps.billing!.checkout).not.toHaveBeenCalled();
     expect(
       (
         await request(app)
@@ -123,7 +124,7 @@ describe("API security and behavior", () => {
           .send({ language: "fr", price: "evil" })
       ).status,
     ).toBe(200);
-    expect(deps.billing.checkout).toHaveBeenCalledWith("fr");
+    expect(deps.billing!.checkout).toHaveBeenCalledWith("fr");
   });
   it("passes untouched raw bytes to webhook verification and retries failures", async () => {
     const { deps } = setup();
@@ -133,6 +134,7 @@ describe("API security and behavior", () => {
         .fn()
         .mockRejectedValue(new AppError(400, "INVALID_SIGNATURE")),
       refresh: vi.fn(),
+      cancel: vi.fn(),
     };
     const app = createApp(deps);
     const payload = '{ "type": "example" }';
@@ -142,11 +144,11 @@ describe("API security and behavior", () => {
       .set("stripe-signature", "bad")
       .send(payload);
     expect(response.status).toBe(400);
-    expect(deps.billing.webhook).toHaveBeenCalledWith(
+    expect(deps.billing!.webhook).toHaveBeenCalledWith(
       Buffer.from(payload),
       "bad",
     );
-    vi.mocked(deps.billing.webhook).mockRejectedValue(new Error("temporary"));
+    vi.mocked(deps.billing!.webhook).mockRejectedValue(new Error("temporary"));
     expect(
       (
         await request(app)
