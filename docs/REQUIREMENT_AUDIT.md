@@ -28,7 +28,7 @@ Date: 2026-09-08. This audit separates implemented behavior from verification th
 | Stripe webhook processing | Relevant events reconcile current customer subscription state | PARTIAL | Signed SDK-generated fixtures pass; real Stripe forwarding not yet exercised |
 | Verify webhook signatures | Raw-body route and official Stripe verifier | PASS | Invalid signature rejected; raw bytes preserved; valid fixture processing tested |
 | Duplicate/repeated delivery safety | Serialized current-state reconciliation, no additive side effects | PASS | Duplicate and stale-event tests; real database transaction regression |
-| Stripe account configuration | Three private backend environment fields | PARTIAL | Examples and setup instructions exist; fields were empty at verification time |
+| Stripe account configuration | Three private backend environment fields | PARTIAL | Monthly sandbox price and local webhook secret saved; CLI listener connected; backend test secret key still missing |
 | Responsive, clean interface | Search workspace, responsive grid and stacking panels | PASS | Implemented CSS, production render; no browser layout audit claimed |
 | Loading, locked, empty and error states | Central translated feedback and disabled pending actions | PASS | Component/API tests and UI implementation |
 | Provider/database/Stripe failures handled | Safe errors, upstream timeouts, history warning and fail-closed authorization | PASS | Provider, timeout, database, raw-signature and network-error tests |
