@@ -16,6 +16,8 @@ export interface Product {
   nutrition?: Record<Nutrient, number | null>;
 }
 export interface SearchResult {
+  page: number;
+  hasNext: boolean;
   products: Product[];
   premium: boolean;
   warning: string | null;

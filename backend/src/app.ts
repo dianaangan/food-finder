@@ -6,17 +6,20 @@ import {
   languages,
   normalizeProduct,
   parseSearch,
+  parsePage,
+  type ProductPage,
   type Language,
 } from "./products.js";
 import type { Store } from "./store.js";
 import type { Billing } from "./billing.js";
 export interface Dependencies {
   store: Pick<Store, "user" | "recent" | "saveSearch">;
-  billing?: Pick<
-    Billing,
-    "checkout" | "webhook" | "refresh" | "cancel" | "resetForTest"
-  >;
-  search: (term: string, language: Language) => Promise<unknown[]>;
+  billing?: Pick<Billing, "checkout" | "webhook" | "refresh" | "resetForTest">;
+  search: (
+    term: string,
+    language: Language,
+    page: number,
+  ) => Promise<ProductPage>;
   origin: string;
   log?: (error: unknown) => void;
 }
@@ -60,6 +63,7 @@ export function createApp({
   let searches = 0;
   app.get("/api/products", async (req, res) => {
     const { term, language } = parseSearch(req.query);
+    const page = parsePage(req.query.page);
     if (Date.now() - windowStart >= 60_000) {
       windowStart = Date.now();
       searches = 0;
@@ -68,29 +72,42 @@ export function createApp({
       res.setHeader("Retry-After", "60");
       throw new AppError(429, "TOO_MANY_SEARCHES");
     }
-    const raw = await search(term, language);
+    const raw = await search(term, language, page);
     // Read authorization after the slow upstream request, as close to serialization as possible.
     const user = await store.user();
     const premium = user.subscriptionStatus === "active";
     let warning: string | null = null;
     try {
-      await store.saveSearch(term, language);
+      if (page === 1) await store.saveSearch(term, language);
     } catch (error) {
       log(error);
       warning = "HISTORY_NOT_SAVED";
     }
     res.json({
-      products: raw.map((p, i) => normalizeProduct(p, language, premium, i)),
+      products: raw.products.map((p, i) =>
+        normalizeProduct(p, language, premium, i),
+      ),
+      page,
+      hasNext: raw.hasNext,
       premium,
       warning,
     });
   });
-  app.get("/api/featured", async (_req, res) => {
-    const raw = await search("oats", "en");
+  app.get("/api/featured", async (req, res) => {
+    const { language } = parseSearch({
+      q: "catalog",
+      lang: req.query.lang ?? "en",
+    });
+    const page = parsePage(req.query.page);
+    const raw = await search("", language, page);
     const user = await store.user();
     const premium = user.subscriptionStatus === "active";
     res.json({
-      products: raw.map((p, i) => normalizeProduct(p, "en", premium, i)),
+      products: raw.products.map((p, i) =>
+        normalizeProduct(p, language, premium, i),
+      ),
+      page,
+      hasNext: raw.hasNext,
       premium,
       warning: null,
     });
@@ -121,12 +138,9 @@ export function createApp({
       throw new AppError(400, "INVALID_LANGUAGE");
     res.json({ url: await billing.checkout(language as Language) });
   });
-  app.post("/api/subscription/cancel", async (_req, res) => {
-    if (!billing) throw new AppError(503, "BILLING_UNAVAILABLE");
-    await billing.cancel();
-    res.json({ ok: true });
-  });
-  app.post("/api/subscription/reset-test", async (_req, res) => {
+  app.post("/api/subscription/reset-test", async (req, res) => {
+    if (!allowedOrigins.has(req.get("origin") ?? ""))
+      throw new AppError(403, "INVALID_ORIGIN");
     if (!billing) throw new AppError(503, "BILLING_UNAVAILABLE");
     await billing.resetForTest();
     res.json({ ok: true });

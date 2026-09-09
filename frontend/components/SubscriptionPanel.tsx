@@ -28,44 +28,61 @@ export function SubscriptionPanel({
     );
   return (
     <section className="subscription-panel" aria-label={t.demo}>
-      <div>
-        <p className="mb-2 text-sm text-slate-500">{t.demo}</p>
-        <h2 className="text-lg font-semibold">
-          {subscription?.active ? t.active : t.free}
-        </h2>
-        <p className="mt-2 max-w-xl text-sm text-slate-600">
-          {issue ? t.subscriptionIssue : t.lockedDetail}
-        </p>
-        {subscription && !subscription.billingAvailable && (
-          <p className="mt-2 text-sm text-slate-600">{t.billingOff}</p>
-        )}
+      <div className="flex min-w-0 items-start gap-4">
+        <span className="plan-icon" aria-hidden="true">
+          {subscription?.active ? "✓" : "◇"}
+        </span>
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="text-xs font-bold uppercase tracking-wider text-emerald-200">
+              {t.demo}
+            </p>
+            <span className="test-badge">{t.testMode}</span>
+          </div>
+          <h2 className="mt-2 text-xl font-bold text-white">
+            {subscription?.active ? t.active : t.free}
+          </h2>
+          <p className="mt-1 max-w-2xl text-sm leading-6 text-emerald-50/80">
+            {issue
+              ? t.subscriptionIssue
+              : subscription?.active
+                ? t.activeDetail
+                : t.lockedDetail}
+          </p>
+          {subscription && !subscription.billingAvailable && (
+            <p className="mt-2 text-sm font-medium text-amber-200">
+              {t.billingOff}
+            </p>
+          )}
+        </div>
       </div>
-      <div className="flex shrink-0 flex-col items-start gap-2 sm:items-end">
+      <div className="flex shrink-0 flex-wrap items-center gap-2 lg:justify-end">
         {!subscription?.active && (
           <button
-            className="button-primary"
+            className="button-light"
             disabled={busy || !subscription?.billingAvailable || Boolean(issue)}
             onClick={onSubscribe}
           >
             {busy ? t.opening : t.subscribe}
-            <span aria-hidden="true"> ↗</span>
+            <span aria-hidden="true">→</span>
+          </button>
+        )}
+        {subscription?.active && (
+          <button
+            className="button-light"
+            disabled={resetBusy || !subscription.billingAvailable}
+            onClick={onReset}
+          >
+            {resetBusy ? t.canceling : t.resetTest}
           </button>
         )}
         <button
-          className="text-xs text-slate-500 underline underline-offset-4"
-          disabled={resetBusy}
-          onClick={onReset}
-        >
-          {resetBusy ? t.canceling : t.resetTest}
-        </button>
-        <button
-          className="text-sm font-medium text-emerald-800 underline decoration-emerald-300 underline-offset-4 disabled:opacity-50"
+          className="button-ghost"
           onClick={onRefresh}
           disabled={checking}
         >
           {checking ? t.checking : t.refresh}
         </button>
-        <span className="text-sm text-slate-500">{t.testMode}</span>
       </div>
     </section>
   );

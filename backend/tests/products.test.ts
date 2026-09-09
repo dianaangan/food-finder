@@ -107,6 +107,58 @@ describe("search input", () => {
   });
 });
 describe("provider integration", () => {
+  it("caches catalog pages separately and stops at the provider's final page", async () => {
+    const fetcher = vi.fn<typeof fetch>().mockImplementation(async (input) => {
+      const page = new URL(String(input)).searchParams.get("page");
+      return new Response(
+        JSON.stringify({ count: 21, products: [{ code: page }] }),
+      );
+    });
+    const search = createProductSearch("test", fetcher);
+    expect(await search("", "en", 1)).toEqual({
+      products: [{ code: "1" }],
+      hasNext: true,
+    });
+    expect(await search("", "en", 2)).toEqual({
+      products: [{ code: "2" }],
+      hasNext: false,
+    });
+    await search("", "fr", 1);
+    expect(fetcher).toHaveBeenCalledTimes(2);
+    await search("peanut", "fr", 2);
+    const url = new URL(String(fetcher.mock.calls[2][0]));
+    expect(url.searchParams.get("page")).toBe("2");
+    expect(url.searchParams.get("search_terms")).toBe("peanut");
+  });
+  it("shares and caches a general catalog request across languages", async () => {
+    const fetcher = vi
+      .fn<typeof fetch>()
+      .mockResolvedValue(
+        new Response(JSON.stringify({ products: [{ code: "1" }] })),
+      );
+    const search = createProductSearch("test", fetcher);
+    const [en, fr] = await Promise.all([search("", "en"), search("", "fr")]);
+    expect(en).toEqual(fr);
+    expect(await search("", "nl")).toEqual(en);
+    expect(fetcher).toHaveBeenCalledTimes(1);
+    const url = new URL(String(fetcher.mock.calls[0][0]));
+    expect(url.pathname).toBe("/api/v2/search");
+    expect(url.searchParams.has("search_terms")).toBe(false);
+  });
+  it("allows retry after a failed catalog request", async () => {
+    const fetcher = vi
+      .fn<typeof fetch>()
+      .mockRejectedValueOnce(new Error("offline"))
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ products: [{ code: "1" }] })),
+      );
+    const search = createProductSearch("test", fetcher);
+    await expect(search("", "en")).rejects.toThrow();
+    expect(await search("", "en")).toEqual({
+      products: [{ code: "1" }],
+      hasNext: false,
+    });
+  });
   it("encodes text search and supplies a user agent", async () => {
     const fetcher = vi
       .fn<typeof fetch>()
@@ -120,7 +172,7 @@ describe("provider integration", () => {
         "oats & milk",
         "fr",
       ),
-    ).toEqual([{ code: "1" }]);
+    ).toEqual({ products: [{ code: "1" }], hasNext: false });
     const [url, options] = fetcher.mock.calls[0];
     expect(new URL(String(url)).searchParams.get("search_terms")).toBe(
       "oats & milk",

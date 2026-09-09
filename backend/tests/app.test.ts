@@ -23,13 +23,64 @@ function setup(status = "none") {
     },
     search: vi
       .fn()
-      .mockResolvedValue([
-        { product_name: "Oats", nutriments: { fat_100g: 8 } },
-      ]),
+      .mockResolvedValue({
+        products: [{ product_name: "Oats", nutriments: { fat_100g: 8 } }],
+        hasNext: true,
+      }),
   };
   return { deps, app: createApp(deps) };
 }
 describe("API security and behavior", () => {
+  it("passes page numbers through for catalog and search without repeating history", async () => {
+    const { app, deps } = setup();
+    const catalog = await request(app).get("/api/featured?lang=en&page=2");
+    expect(deps.search).toHaveBeenCalledWith("", "en", 2);
+    expect(catalog.body).toMatchObject({ page: 2, hasNext: true });
+    const search = await request(app).get(
+      "/api/products?q=peanut&lang=nl&page=3",
+    );
+    expect(search.status).toBe(200);
+    expect(deps.search).toHaveBeenCalledWith("peanut", "nl", 3);
+    expect(deps.store.saveSearch).not.toHaveBeenCalled();
+  });
+  it.each(["0", "-1", "1.5", "abc", "9007199254740992", "1&page=2"])(
+    "rejects invalid page %s before contacting the provider",
+    async (page) => {
+      const { app, deps } = setup();
+      expect(
+        (await request(app).get(`/api/featured?page=${page}`)).status,
+      ).toBe(400);
+      expect(
+        (await request(app).get(`/api/products?q=peanut&lang=en&page=${page}`))
+          .status,
+      ).toBe(400);
+      expect(deps.search).not.toHaveBeenCalled();
+    },
+  );
+  it("loads a localized catalog without saving a search or exposing nutrition", async () => {
+    const { app, deps } = setup();
+    vi.mocked(deps.search).mockResolvedValue({
+      products: [{ product_name_fr: "Lait", nutriments: { fat_100g: 3 } }],
+      hasNext: false,
+    });
+    const response = await request(app).get("/api/featured?lang=fr");
+    expect(response.status).toBe(200);
+    expect(deps.search).toHaveBeenCalledWith("", "fr", 1);
+    expect(response.body.products[0].name).toBe("Lait");
+    expect(response.body.products[0]).not.toHaveProperty("nutrition");
+    expect(deps.store.saveSearch).not.toHaveBeenCalled();
+    expect((await request(app).get("/api/featured?lang=xx")).status).toBe(400);
+  });
+  it("checks access again for each catalog response", async () => {
+    const { app, deps } = setup("active");
+    expect(
+      (await request(app).get("/api/featured")).body.products[0],
+    ).toHaveProperty("nutrition");
+    vi.mocked(deps.store.user).mockResolvedValue(user);
+    expect(
+      (await request(app).get("/api/featured")).body.products[0],
+    ).not.toHaveProperty("nutrition");
+  });
   it.each([
     "none",
     "canceled",
@@ -66,7 +117,7 @@ describe("API security and behavior", () => {
   });
   it("saves zero-result searches", async () => {
     const { app, deps } = setup();
-    vi.mocked(deps.search).mockResolvedValue([]);
+    vi.mocked(deps.search).mockResolvedValue({ products: [], hasNext: false });
     expect(
       (await request(app).get("/api/products?q=nothing&lang=en")).body.products,
     ).toEqual([]);
@@ -104,7 +155,6 @@ describe("API security and behavior", () => {
       checkout: vi.fn().mockResolvedValue("https://checkout.stripe.com/test"),
       webhook: vi.fn(),
       refresh: vi.fn(),
-      cancel: vi.fn(),
       resetForTest: vi.fn(),
     };
     const app = createApp(deps);
@@ -135,7 +185,6 @@ describe("API security and behavior", () => {
         .fn()
         .mockRejectedValue(new AppError(400, "INVALID_SIGNATURE")),
       refresh: vi.fn(),
-      cancel: vi.fn(),
       resetForTest: vi.fn(),
     };
     const app = createApp(deps);

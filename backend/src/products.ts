@@ -1,6 +1,22 @@
 import { AppError } from "./errors.js";
 export const languages = ["en", "nl", "de", "fr"] as const;
 export type Language = (typeof languages)[number];
+export interface ProductPage {
+  products: unknown[];
+  hasNext: boolean;
+}
+export function parsePage(value: unknown): number {
+  if (value === undefined) return 1;
+  // Bound the page before multiplying it by the provider page size.
+  if (
+    typeof value !== "string" ||
+    !/^[1-9]\d*$/.test(value) ||
+    !Number.isSafeInteger(Number(value)) ||
+    Number(value) > Math.floor(Number.MAX_SAFE_INTEGER / 20)
+  )
+    throw new AppError(400, "INVALID_PAGE");
+  return Number(value);
+}
 export function parseSearch(query: Record<string, unknown>): {
   term: string;
   language: Language;
@@ -91,19 +107,41 @@ export function createProductSearch(
   userAgent: string,
   fetcher: typeof fetch = fetch,
 ) {
-  // Full-text search uses the documented legacy CGI endpoint; v2 tag search is not equivalent.
-  return async (term: string, language: Language): Promise<unknown[]> => {
-    const url = new URL("https://world.openfoodfacts.org/cgi/search.pl");
+  const catalog = new Map<number, { data: ProductPage; expires: number }>();
+  const pendingCatalog = new Map<number, Promise<ProductPage>>();
+  // Cache raw catalog data only; subscription access is checked for every response.
+  const fetchProducts = async (
+    term: string,
+    language: Language,
+    page: number,
+  ): Promise<ProductPage> => {
+    const url = new URL(
+      term
+        ? "https://world.openfoodfacts.org/cgi/search.pl"
+        : "https://world.openfoodfacts.org/api/v2/search",
+    );
     url.search = new URLSearchParams({
       search_terms: term,
       search_simple: "1",
       action: "process",
       json: "1",
       page_size: "20",
+      page: String(page),
       lc: language,
       fields:
         "code,product_name,product_name_en,product_name_nl,product_name_de,product_name_fr,brands,image_front_url,selected_images,nutriments",
     }).toString();
+    if (!term) {
+      for (const key of [
+        "search_terms",
+        "search_simple",
+        "action",
+        "json",
+        "lc",
+      ])
+        url.searchParams.delete(key);
+      url.searchParams.set("sort_by", "unique_scans_n");
+    }
     try {
       const response = await fetcher(url, {
         headers: { "User-Agent": userAgent, Accept: "application/json" },
@@ -117,11 +155,19 @@ export function createProductSearch(
       const body = record(await response.json());
       if (!Array.isArray(body.products))
         throw new AppError(502, "PRODUCTS_UNAVAILABLE");
-      return body.products
+      const products = body.products
         .slice(0, 20)
         .filter(
           (p) => p !== null && typeof p === "object" && !Array.isArray(p),
         );
+      const count = Number(body.count);
+      return {
+        products,
+        hasNext:
+          body.count != null && Number.isFinite(count) && count >= 0
+            ? page * 20 < count
+            : body.products.length >= 20,
+      };
     } catch (error) {
       if (error instanceof AppError) throw error;
       if (
@@ -131,5 +177,28 @@ export function createProductSearch(
         throw new AppError(504, "PRODUCTS_TIMEOUT");
       throw new AppError(502, "PRODUCTS_UNAVAILABLE");
     }
+  };
+  return async (
+    term: string,
+    language: Language,
+    page = 1,
+  ): Promise<ProductPage> => {
+    if (term) return fetchProducts(term, language, page);
+    const cached = catalog.get(page);
+    if (cached && cached.expires > Date.now()) return cached.data;
+    const pending = pendingCatalog.get(page);
+    if (pending) return pending;
+    const request = fetchProducts("", language, page)
+      .then((data) => {
+        // Keep memory bounded as visitors browse deeper into the catalog.
+        if (catalog.size >= 30) catalog.delete(catalog.keys().next().value!);
+        catalog.set(page, { data, expires: Date.now() + 300_000 });
+        return data;
+      })
+      .finally(() => {
+        pendingCatalog.delete(page);
+      });
+    pendingCatalog.set(page, request);
+    return request;
   };
 }

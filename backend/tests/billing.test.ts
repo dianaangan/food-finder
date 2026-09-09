@@ -159,16 +159,6 @@ describe("verified subscription reconciliation", () => {
     );
     expect(getUser().checkoutSessionId).toBe("cs_test_1");
   });
-  it("schedules cancellation for an active subscription", async () => {
-    const { billing, stripe } = setup("active");
-    const update = vi
-      .spyOn(stripe.subscriptions, "update")
-      .mockResolvedValue({} as Stripe.Response<Stripe.Subscription>);
-    await billing.cancel();
-    expect(update).toHaveBeenCalledWith("sub_demo", {
-      cancel_at_period_end: true,
-    });
-  });
   it("resets the demo subscription for repeatable test runs", async () => {
     const { billing, stripe, getUser } = setup("active");
     const cancel = vi

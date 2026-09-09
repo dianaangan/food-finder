@@ -1,5 +1,21 @@
 import type { Language } from "./types";
 const en = {
+  explore: "Explore the catalog",
+  clearSearch: "Clear search",
+  popular: "Popular right now",
+  searchResults: "Search results",
+  resultsFor: "Results for",
+  subscriptionReady:
+    "Subscription confirmed. Nutrition details are now unlocked.",
+  activeDetail: "Available nutrition details are unlocked across the catalog.",
+  pagination: "Product pages",
+  previous: "Previous",
+  next: "Next",
+  page: "Page",
+  retry: "Try again",
+  dismiss: "Dismiss notification",
+  catalogUnavailable: "Products could not be loaded",
+  resetDone: "Test subscription reset. You can try checkout again.",
   language: "Language",
   title: "Know what’s in your food.",
   intro: "Find packaged foods and explore their nutritional details.",
@@ -10,8 +26,6 @@ const en = {
   recent: "Recent searches",
   noRecent: "Your recent searches will appear here.",
   results: "Products",
-  first: "Start with something in your cupboard",
-  firstDetail: "Search a product or brand to see what you can find.",
   noResults: "No foods found",
   noResultsDetail: "Try a shorter term or a different product name.",
   unknownName: "Name unavailable",
@@ -20,9 +34,7 @@ const en = {
   nutrition: "Nutrition",
   per100g: "Per 100 g / 100 ml",
   locked: "Unlock nutritional details",
-  cancel: "Unsubscribe",
   canceling: "Updating subscription…",
-  canceledAtPeriodEnd: "Cancellation scheduled at period end.",
   cancelError: "We could not update your subscription.",
   resetTest: "Reset test subscription",
   lockedDetail:
@@ -49,7 +61,7 @@ const en = {
   subscriptionIssue:
     "Subscription needs attention. Check Stripe before starting another subscription.",
   source: "Product data and images from Open Food Facts",
-  limit: "Showing up to 20 products. Some information may be missing.",
+  limit: "20 products per page. Some information may be missing.",
   testMode: "Stripe test mode",
   error: "Something went wrong. Please try again.",
   invalid: "Enter a search term between 1 and 120 characters.",
@@ -67,6 +79,23 @@ type Dictionary = { [K in keyof typeof en]: string };
 export const dictionaries: Record<Language, Dictionary> = {
   en,
   nl: {
+    explore: "Ontdek de catalogus",
+    clearSearch: "Zoekopdracht wissen",
+    popular: "Nu populair",
+    searchResults: "Zoekresultaten",
+    resultsFor: "Resultaten voor",
+    subscriptionReady:
+      "Abonnement bevestigd. Voedingswaarden zijn nu ontgrendeld.",
+    activeDetail:
+      "Beschikbare voedingswaarden zijn in de hele catalogus ontgrendeld.",
+    pagination: "Productpagina’s",
+    previous: "Vorige",
+    next: "Volgende",
+    page: "Pagina",
+    retry: "Opnieuw proberen",
+    dismiss: "Melding sluiten",
+    catalogUnavailable: "Producten konden niet worden geladen",
+    resetDone: "Testabonnement gereset. Je kunt opnieuw afrekenen.",
     language: "Taal",
     title: "Weet wat er in je eten zit.",
     intro: "Vind verpakte levensmiddelen en bekijk hun voedingswaarden.",
@@ -77,8 +106,6 @@ export const dictionaries: Record<Language, Dictionary> = {
     recent: "Recente zoekopdrachten",
     noRecent: "Je recente zoekopdrachten verschijnen hier.",
     results: "Producten",
-    first: "Begin met iets uit je keukenkast",
-    firstDetail: "Zoek een product of merk om te zien wat je vindt.",
     noResults: "Geen producten gevonden",
     noResultsDetail: "Probeer een kortere term of een andere productnaam.",
     unknownName: "Naam niet beschikbaar",
@@ -87,9 +114,7 @@ export const dictionaries: Record<Language, Dictionary> = {
     nutrition: "Voedingswaarden",
     per100g: "Per 100 g / 100 ml",
     locked: "Ontgrendel voedingswaarden",
-    cancel: "Uitschrijven",
     canceling: "Abonnement bijwerken…",
-    canceledAtPeriodEnd: "Opzegging gepland aan het einde van de periode.",
     cancelError: "We konden je abonnement niet bijwerken.",
     resetTest: "Testabonnement resetten",
     lockedDetail:
@@ -116,7 +141,7 @@ export const dictionaries: Record<Language, Dictionary> = {
     subscriptionIssue:
       "Je abonnement vereist aandacht. Controleer Stripe voordat je een nieuw abonnement start.",
     source: "Productgegevens en afbeeldingen van Open Food Facts",
-    limit: "Maximaal 20 producten. Sommige informatie kan ontbreken.",
+    limit: "20 producten per pagina. Sommige informatie kan ontbreken.",
     testMode: "Stripe-testmodus",
     error: "Er ging iets mis. Probeer het opnieuw.",
     invalid: "Voer een zoekterm van 1 tot 120 tekens in.",
@@ -133,6 +158,24 @@ export const dictionaries: Record<Language, Dictionary> = {
       "Er bestaat al een abonnement. Vernieuw de status of controleer Stripe.",
   },
   de: {
+    explore: "Katalog entdecken",
+    clearSearch: "Suche löschen",
+    popular: "Derzeit beliebt",
+    searchResults: "Suchergebnisse",
+    resultsFor: "Ergebnisse für",
+    subscriptionReady:
+      "Abonnement bestätigt. Nährwerte sind jetzt freigeschaltet.",
+    activeDetail:
+      "Verfügbare Nährwerte sind im gesamten Katalog freigeschaltet.",
+    pagination: "Produktseiten",
+    previous: "Zurück",
+    next: "Weiter",
+    page: "Seite",
+    retry: "Erneut versuchen",
+    dismiss: "Benachrichtigung schließen",
+    catalogUnavailable: "Produkte konnten nicht geladen werden",
+    resetDone:
+      "Testabonnement zurückgesetzt. Du kannst den Checkout erneut testen.",
     language: "Sprache",
     title: "Wissen, was in deinem Essen steckt.",
     intro: "Finde verpackte Lebensmittel und entdecke ihre Nährwerte.",
@@ -143,9 +186,6 @@ export const dictionaries: Record<Language, Dictionary> = {
     recent: "Letzte Suchanfragen",
     noRecent: "Deine letzten Suchanfragen erscheinen hier.",
     results: "Produkte",
-    first: "Beginne mit etwas aus deinem Vorratsschrank",
-    firstDetail:
-      "Suche ein Produkt oder eine Marke und entdecke die Ergebnisse.",
     noResults: "Keine Lebensmittel gefunden",
     noResultsDetail:
       "Versuche einen kürzeren Begriff oder einen anderen Produktnamen.",
@@ -155,9 +195,7 @@ export const dictionaries: Record<Language, Dictionary> = {
     nutrition: "Nährwerte",
     per100g: "Pro 100 g / 100 ml",
     locked: "Nährwerte freischalten",
-    cancel: "Abonnement kündigen",
     canceling: "Abonnement wird aktualisiert…",
-    canceledAtPeriodEnd: "Kündigung zum Ende des Zeitraums geplant.",
     cancelError: "Das Abonnement konnte nicht aktualisiert werden.",
     resetTest: "Testabonnement zurücksetzen",
     lockedDetail:
@@ -186,7 +224,7 @@ export const dictionaries: Record<Language, Dictionary> = {
     subscriptionIssue:
       "Dein Abonnement erfordert Aufmerksamkeit. Prüfe Stripe, bevor du ein weiteres abschließt.",
     source: "Produktdaten und Bilder von Open Food Facts",
-    limit: "Bis zu 20 Produkte. Einige Angaben können fehlen.",
+    limit: "20 Produkte pro Seite. Einige Angaben können fehlen.",
     testMode: "Stripe-Testmodus",
     error: "Etwas ist schiefgelaufen. Bitte versuche es erneut.",
     invalid: "Gib einen Suchbegriff mit 1 bis 120 Zeichen ein.",
@@ -205,6 +243,24 @@ export const dictionaries: Record<Language, Dictionary> = {
       "Ein Abonnement besteht bereits. Aktualisiere den Status oder prüfe Stripe.",
   },
   fr: {
+    explore: "Explorer le catalogue",
+    clearSearch: "Effacer la recherche",
+    popular: "Populaires en ce moment",
+    searchResults: "Résultats de recherche",
+    resultsFor: "Résultats pour",
+    subscriptionReady:
+      "Abonnement confirmé. Les valeurs nutritionnelles sont débloquées.",
+    activeDetail:
+      "Les valeurs nutritionnelles disponibles sont débloquées dans tout le catalogue.",
+    pagination: "Pages de produits",
+    previous: "Précédent",
+    next: "Suivant",
+    page: "Page",
+    retry: "Réessayer",
+    dismiss: "Fermer la notification",
+    catalogUnavailable: "Impossible de charger les produits",
+    resetDone:
+      "Abonnement test réinitialisé. Vous pouvez réessayer le paiement.",
     language: "Langue",
     title: "Sachez ce que contient votre nourriture.",
     intro:
@@ -216,9 +272,6 @@ export const dictionaries: Record<Language, Dictionary> = {
     recent: "Recherches récentes",
     noRecent: "Vos recherches récentes apparaîtront ici.",
     results: "Produits",
-    first: "Commencez par un produit de votre placard",
-    firstDetail:
-      "Recherchez un produit ou une marque pour découvrir les résultats.",
     noResults: "Aucun aliment trouvé",
     noResultsDetail: "Essayez un terme plus court ou un autre nom de produit.",
     unknownName: "Nom indisponible",
@@ -227,9 +280,7 @@ export const dictionaries: Record<Language, Dictionary> = {
     nutrition: "Valeurs nutritionnelles",
     per100g: "Pour 100 g / 100 ml",
     locked: "Débloquez les valeurs nutritionnelles",
-    cancel: "Se désabonner",
     canceling: "Abonnement mis à jour…",
-    canceledAtPeriodEnd: "Résiliation prévue à la fin de la période.",
     cancelError: "Impossible de mettre à jour votre abonnement.",
     resetTest: "Réinitialiser l’abonnement test",
     lockedDetail:
@@ -258,8 +309,7 @@ export const dictionaries: Record<Language, Dictionary> = {
     subscriptionIssue:
       "Votre abonnement nécessite votre attention. Vérifiez Stripe avant d’en créer un autre.",
     source: "Données et images des produits : Open Food Facts",
-    limit:
-      "Jusqu’à 20 produits affichés. Certaines informations peuvent manquer.",
+    limit: "20 produits par page. Certaines informations peuvent manquer.",
     testMode: "Mode test Stripe",
     error: "Une erreur est survenue. Veuillez réessayer.",
     invalid: "Saisissez un terme de recherche de 1 à 120 caractères.",

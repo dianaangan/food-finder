@@ -14,7 +14,7 @@ export function ProductCard({
   const name = product.name ?? t.unknownName;
   const values = product.nutrition;
   return (
-    <article className="product-card">
+    <article className="product-card group">
       <div className="product-photo">
         {product.image && failedImage !== product.image ? (
           <img
@@ -26,21 +26,27 @@ export function ProductCard({
             onError={() => setFailedImage(product.image)}
           />
         ) : (
-          <span className="text-sm text-slate-500">{t.noImage}</span>
+          <div className="flex flex-col items-center gap-2 text-slate-400">
+            <span className="text-3xl" aria-hidden="true">
+              ◇
+            </span>
+            <span className="text-xs font-medium">{t.noImage}</span>
+          </div>
         )}
       </div>
-      <div className="p-5">
-        <p className="mb-1 text-sm text-slate-500">
+      <div className="flex flex-1 flex-col p-5">
+        <p className="mb-1 truncate text-xs font-bold uppercase tracking-wider text-emerald-700">
           {product.brand ?? t.unknownBrand}
         </p>
-        <h3 className="mb-5 text-lg font-semibold leading-snug">{name}</h3>
+        <h3 className="mb-5 line-clamp-2 min-h-12 text-base font-bold leading-6 text-slate-900">
+          {name}
+        </h3>
         {!values ? (
-          <div className="locked-box">
-            <span aria-hidden="true">◇</span>
-            <div>
-              <p className="font-semibold">{t.locked}</p>
-              <p className="mt-1 text-sm leading-relaxed">{t.lockedDetail}</p>
-            </div>
+          <div className="locked-box mt-auto">
+            <span className="lock-icon" aria-hidden="true">
+              ◇
+            </span>
+            <p className="text-sm font-semibold">{t.locked}</p>
           </div>
         ) : (
           <div>

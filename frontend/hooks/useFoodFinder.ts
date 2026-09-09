@@ -12,20 +12,23 @@ export function useFoodFinder() {
   const [language, setLanguage] = useState<Language>("en");
   const [query, setQuery] = useState("");
   const [submitted, setSubmitted] = useState("");
+  const [page, setPage] = useState(1);
   const [result, setResult] = useState<SearchResult | null>(null);
   const [recent, setRecent] = useState<RecentSearch[]>([]);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [checking, setChecking] = useState(false);
   const [checkoutBusy, setCheckoutBusy] = useState(false);
-  const [cancelBusy, setCancelBusy] = useState(false);
   const [resetBusy, setResetBusy] = useState(false);
   const [error, setError] = useState("");
   const [billingError, setBillingError] = useState("");
   const [historyError, setHistoryError] = useState("");
   const [checkoutNotice, setCheckoutNotice] = useState("");
   const controller = useRef<AbortController | null>(null);
+  // Only the newest provider response may update the product grid.
   const requestId = useRef(0);
+  // Subscription refreshes reload the exact page the visitor is viewing.
+  const selection = useRef({ term: "", language: "en" as Language, page: 1 });
   const failure = (e: unknown) =>
     e instanceof ApiError ? e.code : "INTERNAL_ERROR";
   const loadRecent = useCallback(async () => {
@@ -38,10 +41,10 @@ export function useFoodFinder() {
     }
   }, []);
   const runSearch = useCallback(
-    async (term: string, lang: Language) => {
+    async (term: string, lang: Language, page = 1) => {
       controller.current?.abort();
       const id = ++requestId.current;
-      if (!term.trim() || term.trim().length > 120) {
+      if (term.trim().length > 120 || /[\p{Cc}\p{Cf}]/u.test(term)) {
         setLoading(false);
         setError("INVALID_SEARCH");
         return;
@@ -52,9 +55,13 @@ export function useFoodFinder() {
       setError("");
       setResult(null);
       setSubmitted(term.trim());
+      setPage(page);
+      selection.current = { term: term.trim(), language: lang, page };
       try {
         const data = await api<SearchResult>(
-          `/products?${new URLSearchParams({ q: term.trim(), lang })}`,
+          term.trim()
+            ? `/products?${new URLSearchParams({ q: term.trim(), lang, page: String(page) })}`
+            : `/featured?${new URLSearchParams({ lang, page: String(page) })}`,
           {
             signal: AbortSignal.any([
               abort.signal,
@@ -64,7 +71,7 @@ export function useFoodFinder() {
         );
         if (id !== requestId.current) return;
         setResult(data);
-        void loadRecent();
+        if (term.trim() && page === 1) void loadRecent();
       } catch (e) {
         if (id === requestId.current && !abort.signal.aborted)
           setError(failure(e));
@@ -91,9 +98,11 @@ export function useFoodFinder() {
     }
   }, []);
   useEffect(() => {
+    let initialLanguage: Language = "en";
     try {
       const saved = localStorage.getItem("food-language");
-      if (saved && saved in languageNames) {
+      if (saved && Object.hasOwn(languageNames, saved)) {
+        initialLanguage = saved as Language;
         setLanguage(saved as Language);
         document.documentElement.lang = saved;
       }
@@ -101,17 +110,28 @@ export function useFoodFinder() {
       /* Preference storage is optional in private browsing. */
     }
     void loadRecent();
-    void api<SearchResult>("/featured")
-      .then((data) => setResult(data))
-      .catch(() => undefined);
+    void runSearch("", initialLanguage);
     const checkout = new URLSearchParams(window.location.search).get(
       "checkout",
     );
     setCheckoutNotice(checkout ?? "");
+    if (checkout) {
+      const cleanUrl = new URL(window.location.href);
+      cleanUrl.searchParams.delete("checkout");
+      window.history.replaceState(null, "", cleanUrl);
+    }
     let stopped = false;
     let timer: ReturnType<typeof setTimeout> | undefined;
     async function poll(attempt: number) {
+      // Webhook delivery can trail the Checkout redirect, so retry briefly.
       const data = await refreshSubscription(checkout === "success");
+      if (!stopped && checkout === "success" && data?.active) {
+        void runSearch(
+          selection.current.term,
+          selection.current.language,
+          selection.current.page,
+        );
+      }
       if (!stopped && checkout === "success" && !data?.active && attempt < 5) {
         timer = setTimeout(() => void poll(attempt + 1), 4000);
       }
@@ -122,7 +142,7 @@ export function useFoodFinder() {
       if (timer) clearTimeout(timer);
       controller.current?.abort();
     };
-  }, [loadRecent, refreshSubscription]);
+  }, [loadRecent, refreshSubscription, runSearch]);
   function changeLanguage(lang: Language) {
     setLanguage(lang);
     document.documentElement.lang = lang;
@@ -131,7 +151,7 @@ export function useFoodFinder() {
     } catch {
       /* The selector still works without browser storage. */
     }
-    if (submitted) void runSearch(submitted, lang);
+    void runSearch(submitted, lang);
   }
   async function subscribe() {
     setCheckoutBusy(true);
@@ -151,23 +171,15 @@ export function useFoodFinder() {
       setCheckoutBusy(false);
     }
   }
-  async function cancelSubscription() {
-    setCancelBusy(true);
-    try {
-      await api("/subscription/cancel", { method: "POST" });
-      await refreshSubscription(true);
-    } catch {
-      setBillingError("CANCEL_ERROR");
-    } finally {
-      setCancelBusy(false);
-    }
-  }
   async function resetSubscription() {
     setResetBusy(true);
     try {
       await api("/subscription/reset-test", { method: "POST" });
+      setResult(null);
       await refreshSubscription(true);
+      await runSearch(submitted, language, page);
       setBillingError("");
+      setCheckoutNotice("reset");
     } catch {
       setBillingError("CANCEL_ERROR");
     } finally {
@@ -179,20 +191,28 @@ export function useFoodFinder() {
     query,
     setQuery,
     submitted,
+    page,
     result,
     recent,
     subscription,
     loading,
     checking,
     checkoutBusy,
-    cancelBusy,
-    cancelSubscription,
     resetBusy,
     resetSubscription,
     error,
     billingError,
     historyError,
     checkoutNotice,
+    dismissNotice: () => {
+      setError("");
+      setBillingError("");
+      setHistoryError("");
+      setCheckoutNotice("");
+      setResult((current) =>
+        current ? { ...current, warning: null } : current,
+      );
+    },
     runSearch,
     refreshSubscription,
     changeLanguage,

@@ -20,18 +20,12 @@ pnpm dev
 
 Open [the application](http://localhost:3000).
 
-Stripe is intentionally disabled until all three test settings are entered in `backend/.env`. Follow the README's Stripe setup and restart Express afterwards. No live key is accepted.
+For Stripe, follow the README setup using the test key in `backend/.env`. The listener must use that same Stripe account; a previously saved CLI login may refer to another sandbox.
 
-## Prepared Stripe sandbox
-
-Stripe CLI is installed locally at `work/stripe-cli/stripe.exe`, with its authorized AgriTrust sandbox configuration in the ignored `work/stripe-config.toml`. Food Finder Premium has a USD 5/month test price. Its price ID and CLI webhook signing secret have been saved in `backend/.env`. The remaining backend setting is a fresh `STRIPE_SECRET_KEY` from this same sandbox.
-
-To restart webhook forwarding from the project root:
+The local CLI is `work/stripe-cli/stripe.exe`. Set `$env:STRIPE_API_KEY` locally to your test key, then run:
 
 ```powershell
-& '.\work\stripe-cli\stripe.exe' listen --events 'customer.subscription.created,customer.subscription.updated,customer.subscription.deleted,checkout.session.completed,checkout.session.async_payment_succeeded,checkout.session.async_payment_failed' --forward-to 'http://127.0.0.1:4000/api/stripe/webhook' --config 'D:\My Projects\food-finder\work\stripe-config.toml'
+& '.\work\stripe-cli\stripe.exe' listen --forward-to http://127.0.0.1:4000/api/stripe/webhook
 ```
 
-Keep the listener running during payment tests. Its displayed signing secret must match `STRIPE_WEBHOOK_SECRET`; update the environment file and restart Express if the secret changes. The listener being connected does not by itself prove that Express processed a payment event.
-
-The portable archive was verified against the MD5 shown on the official MySQL download page. The portable runtime, its databases, dependencies, and local environment files are excluded from Git; they are convenience files for this machine, not required source artifacts.
+Copy the displayed signing secret into `STRIPE_WEBHOOK_SECRET` and restart the backend. Keep the listener open while testing checkout. The portable runtime, database files and environment files are ignored by Git.
