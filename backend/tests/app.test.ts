@@ -21,16 +21,25 @@ function setup(status = "none") {
       recent: vi.fn().mockResolvedValue([]),
       saveSearch: vi.fn().mockResolvedValue(undefined),
     },
-    search: vi
-      .fn()
-      .mockResolvedValue({
-        products: [{ product_name: "Oats", nutriments: { fat_100g: 8 } }],
-        hasNext: true,
-      }),
+    search: vi.fn().mockResolvedValue({
+      products: [{ product_name: "Oats", nutriments: { fat_100g: 8 } }],
+      hasNext: true,
+    }),
   };
   return { deps, app: createApp(deps) };
 }
 describe("API security and behavior", () => {
+  it("keeps nutrition protected when serving a stale cached page", async () => {
+    const { app, deps } = setup();
+    vi.mocked(deps.search).mockResolvedValue({
+      products: [{ product_name: "Oats", nutriments: { fat_100g: 8 } }],
+      hasNext: false,
+      warning: "PRODUCTS_STALE",
+    });
+    const response = await request(app).get("/api/products?q=oats&lang=en");
+    expect(response.body.warning).toBe("PRODUCTS_STALE");
+    expect(response.body.products[0]).not.toHaveProperty("nutrition");
+  });
   it("passes page numbers through for catalog and search without repeating history", async () => {
     const { app, deps } = setup();
     const catalog = await request(app).get("/api/featured?lang=en&page=2");

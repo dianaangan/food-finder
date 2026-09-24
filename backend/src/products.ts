@@ -1,9 +1,11 @@
+import { setTimeout as delay } from "node:timers/promises";
 import { AppError } from "./errors.js";
 export const languages = ["en", "nl", "de", "fr"] as const;
 export type Language = (typeof languages)[number];
 export interface ProductPage {
   products: unknown[];
   hasNext: boolean;
+  warning?: "PRODUCTS_STALE";
 }
 export function parsePage(value: unknown): number {
   if (value === undefined) return 1;
@@ -107,14 +109,25 @@ export function createProductSearch(
   userAgent: string,
   fetcher: typeof fetch = fetch,
 ) {
-  const catalog = new Map<number, { data: ProductPage; expires: number }>();
-  const pendingCatalog = new Map<number, Promise<ProductPage>>();
+  const cache = new Map<string, { data: ProductPage; savedAt: number }>();
+  const pending = new Map<string, Promise<ProductPage>>();
+  let windowStart = Date.now();
+  let searchRequests = 0;
   // Cache raw catalog data only; subscription access is checked for every response.
   const fetchProducts = async (
     term: string,
     language: Language,
     page: number,
+    attempt = 0,
   ): Promise<ProductPage> => {
+    // Retries also count against the provider's search allowance.
+    if (term) {
+      if (Date.now() - windowStart >= 60_000) {
+        windowStart = Date.now();
+        searchRequests = 0;
+      }
+      if (++searchRequests > 10) throw new AppError(429, "TOO_MANY_SEARCHES");
+    }
     const url = new URL(
       term
         ? "https://world.openfoodfacts.org/cgi/search.pl"
@@ -142,16 +155,20 @@ export function createProductSearch(
         url.searchParams.delete(key);
       url.searchParams.set("sort_by", "unique_scans_n");
     }
+    let retryable = true;
     try {
       const response = await fetcher(url, {
         headers: { "User-Agent": userAgent, Accept: "application/json" },
         signal: AbortSignal.timeout(10_000),
       });
-      if (!response.ok)
+      if (!response.ok) {
+        // Do not retry rate limits or rejected requests and worsen provider load.
+        retryable = response.status >= 500;
         throw new AppError(
           response.status === 429 ? 503 : 502,
           "PRODUCTS_UNAVAILABLE",
         );
+      }
       const body = record(await response.json());
       if (!Array.isArray(body.products))
         throw new AppError(502, "PRODUCTS_UNAVAILABLE");
@@ -169,6 +186,10 @@ export function createProductSearch(
             : body.products.length >= 20,
       };
     } catch (error) {
+      if (retryable && attempt === 0) {
+        await delay(300);
+        return fetchProducts(term, language, page, 1);
+      }
       if (error instanceof AppError) throw error;
       if (
         error instanceof Error &&
@@ -183,22 +204,33 @@ export function createProductSearch(
     language: Language,
     page = 1,
   ): Promise<ProductPage> => {
-    if (term) return fetchProducts(term, language, page);
-    const cached = catalog.get(page);
-    if (cached && cached.expires > Date.now()) return cached.data;
-    const pending = pendingCatalog.get(page);
-    if (pending) return pending;
-    const request = fetchProducts("", language, page)
+    const key = JSON.stringify([
+      term.toLowerCase(),
+      term ? language : "",
+      page,
+    ]);
+    const cached = cache.get(key);
+    if (cached && Date.now() - cached.savedAt < 300_000) return cached.data;
+    const existing = pending.get(key);
+    if (existing) return existing;
+    const request = fetchProducts(term, language, page)
       .then((data) => {
         // Keep memory bounded as visitors browse deeper into the catalog.
-        if (catalog.size >= 30) catalog.delete(catalog.keys().next().value!);
-        catalog.set(page, { data, expires: Date.now() + 300_000 });
+        cache.delete(key);
+        if (cache.size >= 100) cache.delete(cache.keys().next().value!);
+        cache.set(key, { data, savedAt: Date.now() });
         return data;
       })
+      .catch((error: unknown) => {
+        // Only reuse the same query/page, and tell the visitor it is a saved result.
+        if (cached && Date.now() - cached.savedAt < 3_600_000)
+          return { ...cached.data, warning: "PRODUCTS_STALE" as const };
+        throw error;
+      })
       .finally(() => {
-        pendingCatalog.delete(page);
+        pending.delete(key);
       });
-    pendingCatalog.set(page, request);
+    pending.set(key, request);
     return request;
   };
 }

@@ -4,8 +4,10 @@ import { NotificationToast } from "../components/NotificationToast";
 import { Pagination } from "../components/Pagination";
 import { ProductCard } from "../components/ProductCard";
 import { SubscriptionPanel } from "../components/SubscriptionPanel";
-import { dictionaries, errorText, languageNames } from "../lib/i18n";
-import type { Language } from "../lib/types";
+import { LanguagePicker } from "../components/LanguagePicker";
+import { ProductSkeleton } from "../components/ProductSkeleton";
+import { dictionaries, errorText } from "../lib/i18n";
+import { demoMode, basePath } from "../lib/preview";
 import { useFoodFinder } from "../hooks/useFoodFinder";
 export default function Home() {
   const resultsSection = useRef<HTMLElement>(null);
@@ -19,6 +21,7 @@ export default function Home() {
     recent,
     subscription,
     loading,
+    slowLoading,
     checking,
     checkoutBusy,
     resetBusy,
@@ -47,7 +50,9 @@ export default function Home() {
           ? t.canceled
           : "";
   const noticeKind = notice
-    ? notice === "HISTORY_NOT_SAVED" || notice === "HISTORY_LOAD_FAILED"
+    ? notice === "HISTORY_NOT_SAVED" ||
+      notice === "HISTORY_LOAD_FAILED" ||
+      notice === "PRODUCTS_STALE"
       ? "warning"
       : "error"
     : checkoutNotice === "reset" ||
@@ -67,46 +72,62 @@ export default function Home() {
     <>
       <header className="site-header">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-5 sm:px-8">
-          <a href="/" className="brand" aria-label="Food Finder home">
+          <a
+            href={`${basePath}/`}
+            className="brand"
+            aria-label="Food Finder home"
+          >
+            <span className="brand-symbol" aria-hidden="true">
+              f.
+            </span>
             <span>foodfinder</span>
           </a>
-          <label className="language-picker">
-            <span className="sr-only sm:not-sr-only sm:text-sm sm:text-slate-600">
-              {t.language}
-            </span>
-            <select
-              className="language-select"
-              value={language}
-              onChange={(e) => changeLanguage(e.target.value as Language)}
-            >
-              {Object.entries(languageNames).map(([code, name]) => (
-                <option key={code} value={code}>
-                  {name}
-                </option>
-              ))}
-            </select>
-          </label>
+          <LanguagePicker language={language} onChange={changeLanguage} />
         </div>
       </header>
       <main className="mx-auto max-w-6xl space-y-8 px-5 pb-8 sm:px-8">
-        <SubscriptionPanel
-          language={language}
-          subscription={subscription}
-          busy={checkoutBusy}
-          checking={checking}
-          onSubscribe={() => void subscribe()}
-          resetBusy={resetBusy}
-          onReset={() => void resetSubscription()}
-          onRefresh={async () => {
-            if (await refreshSubscription(true))
-              await runSearch(submitted, language, page);
-          }}
-        />
+        {demoMode ? (
+          <aside className="demo-panel">
+            <div>
+              <span className="demo-badge">
+                <span className="status-dot active" />
+                {t.demoBadge}
+              </span>
+              <h2>{t.demoTitle}</h2>
+              <p>{t.demoDetail}</p>
+            </div>
+            <svg
+              aria-hidden="true"
+              className="demo-leaf"
+              width="52"
+              height="52"
+              viewBox="0 0 48 48"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.4"
+            >
+              <path d="M38 9C17 6 7 17 14 30c13 7 24-3 24-21Z" />
+              <path d="m10 38 21-21M20 28v-9m0 9h10" />
+            </svg>
+          </aside>
+        ) : (
+          <SubscriptionPanel
+            language={language}
+            subscription={subscription}
+            busy={checkoutBusy}
+            checking={checking}
+            onSubscribe={() => void subscribe()}
+            resetBusy={resetBusy}
+            onReset={() => void resetSubscription()}
+            onRefresh={async () => {
+              if (await refreshSubscription(true))
+                await runSearch(submitted, language, page);
+            }}
+          />
+        )}
         <section className="search-panel">
           <div className="max-w-3xl">
-            <h1 className="text-3xl font-medium tracking-[-0.045em] text-slate-950 sm:text-4xl">
-              {t.title}
-            </h1>
+            <h1 className="hero-title">{t.title}</h1>
             <p className="mt-3 max-w-2xl text-base leading-7 text-slate-500">
               {t.intro}
             </p>
@@ -137,7 +158,7 @@ export default function Home() {
                 className="search-input"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder={t.placeholder}
+                placeholder={demoMode ? t.demoPlaceholder : t.placeholder}
                 maxLength={120}
                 autoComplete="off"
               />
@@ -209,13 +230,27 @@ export default function Home() {
                 {submitted ? `${t.resultsFor} “${submitted}”` : t.results}
               </h2>
             </div>
+            {!loading && result?.total !== undefined && (
+              <span className="text-xs text-stone-500">
+                {result.total} {t.results}
+              </span>
+            )}
             {loading && (
               <span className="inline-flex items-center gap-2 text-sm font-medium text-slate-500">
                 <span className="spinner spinner-dark" aria-hidden="true" />
-                {t.searching}
+                {slowLoading ? t.slowLoading : t.searching}
               </span>
             )}
           </div>
+          {loading && (
+            <div className="loading-note" role="status">
+              <span className="spinner spinner-dark" aria-hidden="true" />
+              <div>
+                <p>{t.loadingProducts}</p>
+                <span>{slowLoading ? t.slowLoading : t.loadingDetail}</span>
+              </div>
+            </div>
+          )}
           {result?.products.length ? (
             <div className="grid gap-x-6 gap-y-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {result.products.map((product, index) => (
@@ -232,13 +267,7 @@ export default function Home() {
               aria-hidden="true"
             >
               {Array.from({ length: 8 }, (_, index) => (
-                <div
-                  key={index}
-                  className="h-80 animate-pulse rounded-lg bg-stone-100 motion-reduce:animate-none"
-                >
-                  <div className="m-5 h-40 rounded-xl bg-slate-100" />
-                  <div className="mx-5 h-4 w-2/3 rounded bg-slate-100" />
-                </div>
+                <ProductSkeleton key={index} />
               ))}
             </div>
           ) : (
@@ -253,7 +282,11 @@ export default function Home() {
                 {result ? t.noResults : t.catalogUnavailable}
               </h3>
               <p className="mt-2 text-slate-500">
-                {result ? t.noResultsDetail : t.provider}
+                {result
+                  ? demoMode
+                    ? t.demoNoResults
+                    : t.noResultsDetail
+                  : errorText(error || "PRODUCTS_UNAVAILABLE", language)}
               </p>
               {!result && (
                 <button
@@ -280,7 +313,9 @@ export default function Home() {
         </section>
         <footer className="flex flex-col justify-between gap-3 border-t border-slate-200 py-6 text-sm text-slate-500 sm:flex-row">
           <p>
-            © {new Date().getFullYear()} Food Finder · {t.limit}
+            {demoMode
+              ? t.demoSource
+              : `© ${new Date().getFullYear()} Food Finder · ${t.limit}`}
           </p>
           <a
             className="underline underline-offset-4"

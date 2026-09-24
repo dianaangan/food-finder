@@ -86,6 +86,9 @@ it("does not let a slow catalog overwrite a newer search", async () => {
     return new Response(JSON.stringify(body));
   });
   render(<Home />);
+  expect(screen.getByRole("status")).toHaveTextContent(
+    "Loading product photos and details.",
+  );
   fireEvent.change(screen.getByRole("textbox"), { target: { value: "oats" } });
   fireEvent.click(screen.getByRole("button", { name: /Search foods/ }));
   await screen.findByText("Searched oats");

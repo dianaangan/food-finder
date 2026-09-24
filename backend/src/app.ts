@@ -76,7 +76,7 @@ export function createApp({
     // Read authorization after the slow upstream request, as close to serialization as possible.
     const user = await store.user();
     const premium = user.subscriptionStatus === "active";
-    let warning: string | null = null;
+    let warning: string | null = raw.warning ?? null;
     try {
       if (page === 1) await store.saveSearch(term, language);
     } catch (error) {
@@ -109,7 +109,7 @@ export function createApp({
       page,
       hasNext: raw.hasNext,
       premium,
-      warning: null,
+      warning: raw.warning ?? null,
     });
   });
   app.get("/api/recent-searches", async (_req, res) => {

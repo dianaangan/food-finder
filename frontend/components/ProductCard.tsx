@@ -59,11 +59,14 @@ export function ProductCard({
             <p className="text-xs">{t.locked}</p>
           </div>
         ) : (
-          <div>
-            <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
-              <h4 className="font-semibold">{t.nutrition}</h4>
-              <span className="text-sm text-slate-500">{t.per100g}</span>
-            </div>
+          <details className="nutrition-details mt-auto">
+            <summary>
+              <span>{t.nutrition}</span>
+              <span className="nutrition-toggle" aria-hidden="true">
+                +
+              </span>
+            </summary>
+            <p className="mb-3 text-xs text-stone-500">{t.per100g}</p>
             {Object.values(values).every((v) => v === null) ? (
               <p className="text-sm text-slate-500">{t.noNutrition}</p>
             ) : (
@@ -83,7 +86,7 @@ export function ProductCard({
                 ))}
               </dl>
             )}
-          </div>
+          </details>
         )}
       </div>
     </article>

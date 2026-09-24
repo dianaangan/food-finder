@@ -5,6 +5,7 @@ export default tseslint.config(
     ignores: [
       "**/node_modules/**",
       "**/.next/**",
+      "**/out/**",
       "**/dist/**",
       "**/next-env.d.ts",
       "work/**",
@@ -12,6 +13,10 @@ export default tseslint.config(
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,
+  {
+    files: ["scripts/*.mjs"],
+    languageOptions: { globals: { process: "readonly" } },
+  },
   {
     files: ["**/*.{ts,tsx}"],
     rules: {

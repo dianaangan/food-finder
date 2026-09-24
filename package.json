@@ -3,6 +3,8 @@
   "private": true,
   "packageManager": "pnpm@11.19.0",
   "scripts": {
+    "demo:build": "node scripts/build-demo.mjs",
+    "demo:refresh": "pnpm --filter backend exec tsx scripts/export-demo.ts",
     "dev": "pnpm --parallel --filter ./frontend --filter ./backend dev",
     "build": "pnpm --filter backend build && pnpm --filter frontend build",
     "typecheck": "pnpm -r typecheck",

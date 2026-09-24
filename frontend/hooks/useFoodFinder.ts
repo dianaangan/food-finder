@@ -17,6 +17,7 @@ export function useFoodFinder() {
   const [recent, setRecent] = useState<RecentSearch[]>([]);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [loading, setLoading] = useState(true);
+  const [slowLoading, setSlowLoading] = useState(false);
   const [checking, setChecking] = useState(false);
   const [checkoutBusy, setCheckoutBusy] = useState(false);
   const [resetBusy, setResetBusy] = useState(false);
@@ -52,6 +53,10 @@ export function useFoodFinder() {
       const abort = new AbortController();
       controller.current = abort;
       setLoading(true);
+      setSlowLoading(false);
+      const slowTimer = setTimeout(() => {
+        if (id === requestId.current) setSlowLoading(true);
+      }, 4000);
       setError("");
       setResult(null);
       setSubmitted(term.trim());
@@ -76,6 +81,7 @@ export function useFoodFinder() {
         if (id === requestId.current && !abort.signal.aborted)
           setError(failure(e));
       } finally {
+        clearTimeout(slowTimer);
         if (id === requestId.current) setLoading(false);
       }
     },
@@ -196,6 +202,7 @@ export function useFoodFinder() {
     recent,
     subscription,
     loading,
+    slowLoading,
     checking,
     checkoutBusy,
     resetBusy,

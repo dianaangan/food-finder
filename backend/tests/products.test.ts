@@ -149,6 +149,7 @@ describe("provider integration", () => {
     const fetcher = vi
       .fn<typeof fetch>()
       .mockRejectedValueOnce(new Error("offline"))
+      .mockRejectedValueOnce(new Error("offline"))
       .mockResolvedValueOnce(
         new Response(JSON.stringify({ products: [{ code: "1" }] })),
       );
@@ -158,6 +159,55 @@ describe("provider integration", () => {
       products: [{ code: "1" }],
       hasNext: false,
     });
+  });
+  it("recovers from a temporary provider error and shares repeated searches", async () => {
+    const fetcher = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(new Response("busy", { status: 503 }))
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ products: [{ code: "1" }] })),
+      );
+    const search = createProductSearch("test", fetcher);
+    const [first, second] = await Promise.all([
+      search("oats", "en"),
+      search("oats", "en"),
+    ]);
+    expect(first).toEqual(second);
+    expect(await search("OATS", "en")).toEqual(first);
+    expect(fetcher).toHaveBeenCalledTimes(2);
+  });
+  it("does not retry a rate-limited provider", async () => {
+    const fetcher = vi
+      .fn<typeof fetch>()
+      .mockResolvedValue(new Response("busy", { status: 429 }));
+    await expect(
+      createProductSearch("test", fetcher)("oats", "en"),
+    ).rejects.toMatchObject({ status: 503 });
+    expect(fetcher).toHaveBeenCalledTimes(1);
+  });
+  it("uses only a recent cached match when upstream fails, then expires it", async () => {
+    const clock = vi.spyOn(Date, "now").mockReturnValue(1_000_000);
+    try {
+      const fetcher = vi
+        .fn<typeof fetch>()
+        .mockResolvedValueOnce(
+          new Response(JSON.stringify({ products: [{ code: "oats" }] })),
+        )
+        .mockRejectedValue(new Error("offline"));
+      const search = createProductSearch("test", fetcher);
+      await search("oats", "en");
+      clock.mockReturnValue(1_400_000);
+      expect(await search("oats", "en")).toMatchObject({
+        warning: "PRODUCTS_STALE",
+        products: [{ code: "oats" }],
+      });
+      await expect(search("oats", "fr")).rejects.toThrow();
+      await expect(search("oats", "en", 2)).rejects.toThrow();
+      clock.mockReturnValue(5_000_000);
+      await expect(search("oats", "en")).rejects.toThrow();
+    } finally {
+      clock.mockRestore();
+    }
   });
   it("encodes text search and supplies a user agent", async () => {
     const fetcher = vi

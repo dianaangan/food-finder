@@ -16,6 +16,7 @@ export interface Product {
   nutrition?: Record<Nutrient, number | null>;
 }
 export interface SearchResult {
+  total?: number;
   page: number;
   hasNext: boolean;
   products: Product[];

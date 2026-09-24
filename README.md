@@ -2,6 +2,21 @@
 
 A small full-stack hiring assessment: search packaged foods, switch between English, Dutch, German and French, revisit recent searches, and unlock available nutrition through a monthly Stripe test subscription.
 
+**[Open the live preview](https://dianaangan.github.io/food-finder/)** — hosted on GitHub Pages. It searches a saved selection of real Open Food Facts products, supports pagination and all four languages, and includes sample nutrition. It does not run MySQL or Stripe; recent searches last for the browser session. The full application below uses the live API and enforces subscription access on the backend.
+
+## GitHub Pages demo
+
+The `Publish demo` workflow builds and deploys the preview whenever `master` is pushed. In repository **Settings → Pages**, the source must be **GitHub Actions**. No billing keys or database credentials are needed by this workflow.
+
+```sh
+pnpm install --frozen-lockfile
+pnpm demo:build
+```
+
+The export is in `frontend/out`, configured for `/food-finder/`. Set `NEXT_PUBLIC_BASE_PATH` before building if the repository name changes. `pnpm demo:refresh` replaces the saved catalog with real products fetched from Open Food Facts; review and commit the updated JSON before publishing. Failed provider pages are skipped, and exports with fewer than 40 products are rejected. The dataset records its capture date and source; data is attributed to Open Food Facts under [ODbL](https://opendatacommons.org/licenses/odbl/1-0/). Images remain served by Open Food Facts.
+
+The preview uses a separate build mode (`NEXT_PUBLIC_DEMO_MODE=true`). The normal `pnpm dev` / `pnpm build` commands continue to run the full application. Preview nutrition is bundled only into the demo build.
+
 The required stack is preserved: **Next.js / React / TypeScript / Tailwind CSS** on the frontend and **Express / TypeScript / Prisma / MySQL / Stripe** on the backend. Product records come from Open Food Facts through Express.
 
 ## Evaluator quick path
@@ -101,7 +116,7 @@ The secret key, price, and webhook secret must belong to the same Stripe test ac
 
 - Next.js rewrites same-origin `/api` requests to Express. The browser never calls Open Food Facts or Stripe with a secret.
 - Express validates search, language, page, origin, and webhook signatures. It checks subscription access immediately before serializing every product response.
-- Open Food Facts catalog pages are cached briefly as raw data. Nutrition is added only after the current database subscription state is read, so cached data cannot bypass access control.
+- Open Food Facts pages are cached for five minutes as raw data; identical requests share one fetch. A failed request gets one automatic retry unless the provider rate-limits or rejects it. A matching saved page up to an hour old can be returned with a visible notice. Nutrition is added only after the current database subscription state is read, so cached data cannot bypass access control.
 - Prisma stores the one demo user and its recent searches in MySQL. Row locking serializes checkout, refresh, webhook, and reset updates for that shared user.
 - Product requests use cancellation and request IDs so a slow older response cannot overwrite a newer search.
 - Comments are reserved for concurrency, authorization, caching, and provider behavior that is not clear from the code itself.

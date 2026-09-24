@@ -4,6 +4,14 @@ export class ApiError extends Error {
   }
 }
 export async function api<T>(path: string, options?: RequestInit): Promise<T> {
+  if (process.env.NEXT_PUBLIC_DEMO_MODE === "true") {
+    const { demoApi } = await import("./demo");
+    try {
+      return await demoApi<T>(path);
+    } catch {
+      throw new ApiError("NETWORK_ERROR");
+    }
+  }
   let response: Response;
   try {
     response = await fetch(`/api${path}`, {

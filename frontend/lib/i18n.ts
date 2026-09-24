@@ -1,5 +1,19 @@
 import type { Language } from "./types";
 const en = {
+  demoPlaceholder: "Try Skippy, Lindt, or Nutella",
+  demoNoResults:
+    "This preview searches a saved selection. Try Skippy, Lindt, or Nutella.",
+  loadingProducts: "Finding your next food discovery…",
+  loadingDetail: "Loading product photos and details.",
+  slowLoading:
+    "This search is taking a little longer. We’re still working on it.",
+  cached: "Showing saved results while the food service catches up.",
+  demoTitle: "Explore the demo",
+  demoDetail:
+    "A saved selection of real products, with nutrition included. Search, browse, or switch languages — no account needed.",
+  demoBadge: "Interactive preview",
+  demoSource:
+    "Saved Open Food Facts catalog · Live checkout is available in the full app.",
   explore: "Explore the catalog",
   clearSearch: "Clear search",
   popular: "Popular right now",
@@ -66,7 +80,7 @@ const en = {
   error: "Something went wrong. Please try again.",
   invalid: "Enter a search term between 1 and 120 characters.",
   network: "Cannot reach the server. Please try again.",
-  provider: "The food database is unavailable. Please try again shortly.",
+  provider: "We couldn’t finish this search. Please try once more.",
   timeout: "The food database took too long to respond. Please try again.",
   rate: "Too many searches. Please wait a minute and try again.",
   historyWarning: "Results are available, but your search could not be saved.",
@@ -79,6 +93,20 @@ type Dictionary = { [K in keyof typeof en]: string };
 export const dictionaries: Record<Language, Dictionary> = {
   en,
   nl: {
+    demoPlaceholder: "Bijvoorbeeld Skippy, Lindt of Nutella",
+    demoNoResults:
+      "Deze demo doorzoekt een opgeslagen selectie. Probeer Skippy, Lindt of Nutella.",
+    loadingProducts: "We zoeken producten voor je…",
+    loadingDetail: "Productfoto’s en informatie worden geladen.",
+    slowLoading: "Dit duurt iets langer. We zijn nog aan het zoeken.",
+    cached:
+      "Opgeslagen resultaten worden getoond terwijl de voedselservice herstelt.",
+    demoTitle: "Ontdek de demo",
+    demoDetail:
+      "Een opgeslagen selectie echte producten, inclusief voedingswaarden. Zoek, blader of wijzig de taal — zonder account.",
+    demoBadge: "Interactieve demo",
+    demoSource:
+      "Opgeslagen Open Food Facts-catalogus · Live betalen is beschikbaar in de volledige app.",
     explore: "Ontdek de catalogus",
     clearSearch: "Zoekopdracht wissen",
     popular: "Nu populair",
@@ -147,7 +175,7 @@ export const dictionaries: Record<Language, Dictionary> = {
     invalid: "Voer een zoekterm van 1 tot 120 tekens in.",
     network: "De server is niet bereikbaar. Probeer het opnieuw.",
     provider:
-      "De voedingsdatabase is niet beschikbaar. Probeer het later opnieuw.",
+      "We konden deze zoekopdracht niet voltooien. Probeer het nog eens.",
     timeout: "De voedingsdatabase reageerde te langzaam. Probeer het opnieuw.",
     rate: "Te veel zoekopdrachten. Wacht een minuut en probeer het opnieuw.",
     historyWarning:
@@ -158,6 +186,20 @@ export const dictionaries: Record<Language, Dictionary> = {
       "Er bestaat al een abonnement. Vernieuw de status of controleer Stripe.",
   },
   de: {
+    demoPlaceholder: "Zum Beispiel Skippy, Lindt oder Nutella",
+    demoNoResults:
+      "Diese Vorschau durchsucht eine gespeicherte Auswahl. Versuche Skippy, Lindt oder Nutella.",
+    loadingProducts: "Wir suchen passende Lebensmittel…",
+    loadingDetail: "Produktfotos und Informationen werden geladen.",
+    slowLoading: "Diese Suche dauert etwas länger. Wir suchen weiter.",
+    cached:
+      "Gespeicherte Ergebnisse werden angezeigt, während sich der Datendienst erholt.",
+    demoTitle: "Entdecke die Demo",
+    demoDetail:
+      "Eine gespeicherte Auswahl echter Produkte mit Nährwerten. Suchen, stöbern oder Sprache wechseln — ohne Konto.",
+    demoBadge: "Interaktive Vorschau",
+    demoSource:
+      "Gespeicherter Open Food Facts-Katalog · Live-Checkout ist in der vollständigen App verfügbar.",
     explore: "Katalog entdecken",
     clearSearch: "Suche löschen",
     popular: "Derzeit beliebt",
@@ -230,7 +272,7 @@ export const dictionaries: Record<Language, Dictionary> = {
     invalid: "Gib einen Suchbegriff mit 1 bis 120 Zeichen ein.",
     network: "Der Server ist nicht erreichbar. Bitte versuche es erneut.",
     provider:
-      "Die Lebensmitteldatenbank ist nicht verfügbar. Bitte versuche es später erneut.",
+      "Diese Suche konnte nicht abgeschlossen werden. Bitte versuche es noch einmal.",
     timeout:
       "Die Lebensmitteldatenbank hat zu lange gebraucht. Bitte versuche es erneut.",
     rate: "Zu viele Suchanfragen. Bitte warte eine Minute.",
@@ -243,6 +285,20 @@ export const dictionaries: Record<Language, Dictionary> = {
       "Ein Abonnement besteht bereits. Aktualisiere den Status oder prüfe Stripe.",
   },
   fr: {
+    demoPlaceholder: "Par exemple Skippy, Lindt ou Nutella",
+    demoNoResults:
+      "Cet aperçu recherche dans une sélection enregistrée. Essayez Skippy, Lindt ou Nutella.",
+    loadingProducts: "À la recherche de votre prochaine découverte…",
+    loadingDetail: "Chargement des photos et des informations produits.",
+    slowLoading: "Cette recherche prend un peu plus de temps. Nous continuons.",
+    cached:
+      "Affichage des résultats enregistrés pendant le rétablissement du service.",
+    demoTitle: "Découvrez la démo",
+    demoDetail:
+      "Une sélection enregistrée de vrais produits, avec leurs valeurs nutritionnelles. Recherchez, explorez ou changez de langue — sans compte.",
+    demoBadge: "Aperçu interactif",
+    demoSource:
+      "Catalogue Open Food Facts enregistré · Le paiement est disponible dans l’application complète.",
     explore: "Explorer le catalogue",
     clearSearch: "Effacer la recherche",
     popular: "Populaires en ce moment",
@@ -314,8 +370,7 @@ export const dictionaries: Record<Language, Dictionary> = {
     error: "Une erreur est survenue. Veuillez réessayer.",
     invalid: "Saisissez un terme de recherche de 1 à 120 caractères.",
     network: "Le serveur est inaccessible. Veuillez réessayer.",
-    provider:
-      "La base alimentaire est indisponible. Veuillez réessayer plus tard.",
+    provider: "Impossible de terminer cette recherche. Veuillez réessayer.",
     timeout:
       "La base alimentaire a mis trop de temps à répondre. Veuillez réessayer.",
     rate: "Trop de recherches. Patientez une minute avant de réessayer.",
@@ -340,6 +395,7 @@ export function errorText(code: string, language: Language) {
     NETWORK_ERROR: t.network,
     PRODUCTS_UNAVAILABLE: t.provider,
     PRODUCTS_TIMEOUT: t.timeout,
+    PRODUCTS_STALE: t.cached,
     TOO_MANY_SEARCHES: t.rate,
     HISTORY_NOT_SAVED: t.historyWarning,
     HISTORY_LOAD_FAILED: t.historyError,
